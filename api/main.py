@@ -44,20 +44,46 @@ class GeneModel(db.Model, Gene):
 
 @app.route('/bindings')
 def bindings():
+   #range search - use query(x).filter(x.id.in_([1,3]))
    req_id = request.args.get('id', default="", type=int)
    result = BindingSiteModel.query.filter(BindingSiteModel.id == req_id)
    return jsonify([log.serialize() for log in result])
 
 @app.route('/genes')
 def genes():
-   req_symbol = request.args.get('symbol', default="", type=str)
-   result = GeneModel.query.filter(GeneModel.symbol == req_symbol)
+   req_symbol = request.args.get('symbol', type=str)
+   req_id = request.args.get('id', type=str)
+
+   if(req_symbol == None and req_id == None):
+      return "<h1>Missing arguments<h1>"
+
+   filters = []
+   if(req_symbol != None):
+      symbol_filter = GeneModel.symbol == req_symbol
+      filters.append(symbol_filter)
+
+   if(req_id != None):
+      id_filter = GeneModel.id == req_id
+      filters.append(id_filter)
+
+   result = GeneModel.query.filter(*filters)
    return jsonify([log.serialize() for log in result])
 
 @app.route('/proteins')
 def protein_by_name():
-   requested_name = request.args.get('protein_name', default="", type=str)
-   result = ProteinModel.query.filter(ProteinModel.protein_name == requested_name)
+   req_name = request.args.get('protein_name', type=str)
+   req_id = request.args.get('protein_id', type=str)
+   
+   if(req_name == None and req_id == None):
+      return 'specify arguments plz'
+
+   filters=[]
+   if(req_name != None):
+      filters.append(ProteinModel.protein_name == req_name)
+   if(req_id != None):
+      filters.append(ProteinModel.protein_id == req_id)
+
+   result = ProteinModel.query.filter(*filters)
    return jsonify([log.serialize() for log in result])
 
 if __name__ == '__main__':
