@@ -1,7 +1,6 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Float
 from sqlalchemy.orm import relationship
-
-from database import Base, engine
+from db.database import Base, engine
 
 class Protein(Base):
     __tablename__ = "proteins"
@@ -46,4 +45,5 @@ class BindingSite(Base):
     score = Column(Float, index=True)
     note = Column(String)
 
-Base.metadata.create_all(bind=engine)
+#TODO move to other script
+# Base.metadata.create_all(bind=engine)
