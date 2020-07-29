@@ -45,8 +45,33 @@ class GeneModel(db.Model, Gene):
 @app.route('/bindings')
 def bindings():
    #range search - use query(x).filter(x.id.in_([1,3]))
-   req_id = request.args.get('id', default="", type=int)
-   result = BindingSiteModel.query.filter(BindingSiteModel.id == req_id)
+   req_id = request.args.get('id', type=int)
+   req_min = request.args.get('min', type=int)
+   req_max = request.args.get('max', type=int)
+   req_score_min = request.args.get('score_min', type=float)
+   req_score_max = request.args.get('score_max', type=float)
+
+   if(req_id==None and req_min==None and req_max == None and req_score_min == None and req_score_max == None):
+      return "Supply arguments pls"
+
+   filters = []
+   if(req_id!=None):
+      filters.append(BindingSiteModel.id == req_id)
+
+   if(req_min!=None):
+      filters.append(BindingSiteModel.start >= req_min)
+
+   if(req_max != None):
+      filters.append(BindingSiteModel.end <= req_max)
+
+   if(req_score_min != None):
+      filters.append(BindingSiteModel.score >= req_score_min)
+
+   if(req_score_max != None):
+      filters.append(BindingSiteModel.score <= req_score_max)
+
+
+   result = BindingSiteModel.query.filter(*filters)
    return jsonify([log.serialize() for log in result])
 
 @app.route('/genes')
@@ -70,7 +95,7 @@ def genes():
    return jsonify([log.serialize() for log in result])
 
 @app.route('/proteins')
-def protein_by_name():
+def proteins():
    req_name = request.args.get('protein_name', type=str)
    req_id = request.args.get('protein_id', type=str)
    
