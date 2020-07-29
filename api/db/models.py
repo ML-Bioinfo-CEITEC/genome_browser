@@ -17,7 +17,6 @@ class Gene(Base):
     __tablename__ = "genes"
 
     id = Column(String, primary_key=True, index=True)
-    # symbol = Column(String, ForeignKey("proteins.protein_name"), index=True)
     symbol = Column(String, index=True)
     biotype = Column(String, index=True)
     chr = Column(String, index=True)
@@ -38,7 +37,6 @@ class BindingSite(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     protein_name = Column(String, index=True)
-    # protein_name = Column(String, ForeignKey("proteins.protein_name"), index=True)
     chr = Column(String, index=True)
     start = Column(Integer, index=True)
     end = Column(Integer, index=True)
@@ -46,4 +44,4 @@ class BindingSite(Base):
     score = Column(Float, index=True)
     note = Column(String)
 
-Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine)

@@ -1,7 +1,8 @@
 import pandas as pd
 from database import engine
+from pathlib import PurePosixPath
 
-base_path = 'C:/Users/Vlastimil Martinek/Documents/repos/projectBakery/api/db'
+base_path = PurePosixPath(__file__).parent
 
 csv_file_path = f'{base_path}/dummy_protein_df.csv'
 with open(csv_file_path, 'r') as file:
