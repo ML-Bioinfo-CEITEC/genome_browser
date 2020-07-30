@@ -1,6 +1,6 @@
 from flask import jsonify, request, Blueprint
 from models import ProteinModel, BindingSiteModel, GeneModel
-from db.database import SessionLocal
+from db.database import db
 
 genomic = Blueprint('genomic', __name__)
 
@@ -76,23 +76,21 @@ def proteins():
 @genomic.route('/join')
 #binding sites - protein
 def join():
-   #TODO guide on sessions https://docs.sqlalchemy.org/en/13/orm/session_basics.html
-   #When to use session and when not?
-   session = SessionLocal()
+   req_name = request.args.get('protein_name', type=str)
+   page = request.args.get('page', type=int, default=1)
+   query = db.session.query(ProteinModel, BindingSiteModel).filter(ProteinModel.protein_name == req_name).join(BindingSiteModel, ProteinModel.protein_name == BindingSiteModel.protein_name)
+   # print('query printing')
+   # print(query)
 
-   query = []
-   try:
-      req_name = request.args.get('protein_name', type=str)
+#    result = query.all()
+   pagination = query.paginate(page=page, per_page=4)
+   result = pagination.items
+   results_dicts_array = [{**log.ProteinModel.serialize(), **log.BindingSiteModel.serialize()} for log in result]
+   total_page_info = {'total_pages':pagination.pages}
+   return jsonify([total_page_info] + results_dicts_array)
 
-      query = session.query(ProteinModel, BindingSiteModel).filter(ProteinModel.protein_name == req_name).join(BindingSiteModel, ProteinModel.protein_name == BindingSiteModel.protein_name)
-      # print('query printing')
-      # print(query)
-      result = query.all()
-   except:
-      session.rollback()
-      raise
-   finally:
-      session.close()
-   
-   #TODO remoove 20 llimit and resolve too big requests somehow   
-   return jsonify([{**log.ProteinModel.serialize(), **log.BindingSiteModel.serialize()} for log in result][0:20])
+
+
+
+
+

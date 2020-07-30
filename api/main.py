@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from db.database import SQLALCHEMY_DATABASE_URL, SessionLocal
+from db.database import SQLALCHEMY_DATABASE_URL
 from models import ProteinModel, BindingSiteModel, GeneModel
 from routes import genomic
 from db.database import db
