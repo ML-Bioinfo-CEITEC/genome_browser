@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from db.models import Protein, BindingSite, Gene
-from db.database import SQLALCHEMY_DATABASE_URL
+from db.database import SQLALCHEMY_DATABASE_URL, SessionLocal
 
 app = Flask(__name__)
 #TODO URI vs URL
@@ -110,6 +110,27 @@ def proteins():
 
    result = ProteinModel.query.filter(*filters)
    return jsonify([log.serialize() for log in result])
+
+@app.route('/join')
+#binding sites - protein
+def join():
+   #TODO guide on sessions https://docs.sqlalchemy.org/en/13/orm/session_basics.html
+   session = SessionLocal()
+
+   query = []
+   try:
+      req_name = request.args.get('protein_name', type=str)
+      #TODO this doesnt use indexes? use join?
+      query = session.query(ProteinModel, BindingSiteModel).filter(ProteinModel.protein_name == req_name).all()
+   except:
+      session.rollback()
+      raise
+   finally:
+      session.close()
+   
+   #TODO remoove 20 llimit and resolve too big requests somehow
+   return jsonify([{**log.ProteinModel.serialize(), **log.BindingSiteModel.serialize()} for log in query][0:20])
+
 
 if __name__ == '__main__':
    app.run()
