@@ -4,7 +4,7 @@ from db.database import db
 
 genomic = Blueprint('genomic', __name__)
 
-@genomic.route('/bindings')
+@genomic.route('/bindings', methods=['GET'])
 def bindings():
    #range search - use query(x).filter(x.id.in_([1,3]))
    req_id = request.args.get('id', type=int)
@@ -41,6 +41,7 @@ def bindings():
       result = result.order_by(BindingSiteModel.score.desc())
 
    if(sortby == "protein_name"):
+      #.desc() is redundant?
       result = result.order_by(BindingSiteModel.protein_name.desc())
 
    pagination = result.paginate(page = page, per_page = 10)
@@ -99,8 +100,19 @@ def join():
    pagination = query.paginate(page=page, per_page=4)
    result = pagination.items
    results_dicts_array = [{**log.ProteinModel.serialize(), **log.BindingSiteModel.serialize()} for log in result]
-   total_page_info = {'total_pages':pagination.pages}
+   # total_page_info = {'total_pages':pagination.pages}
 #    return jsonify([total_page_info] + results_dicts_array)
    return render_template('test.html', rows=results_dicts_array, page=page, pages=pagination.pages)
 
+@genomic.route('/search', methods=["GET"])
+def search():
+   #TODO
+   #search by
+   #protein
+   #genomic location
+   #chromozom
+   #gene area
 
+   page = request.args.get('page', type=int, default = 1)
+   # print(page)
+   return jsonify(page)
