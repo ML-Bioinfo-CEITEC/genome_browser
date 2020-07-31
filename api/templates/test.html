@@ -1,0 +1,26 @@
+<html>
+    <head>
+        <title>Gene search</title>
+    </head>
+    <body>
+        <table style="width:100%">
+            
+            <tbody>
+                <tr>
+                    {% for key, value in rows[0].items()%}
+                    <td>{{key}}</td>
+                    {% endfor %}
+                </tr>    
+                {% for row in rows%}
+                <tr>
+                    {% for key, value in row.items()%}
+                    <td>{{value}}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div>_____________</div>
+        <div>Page {{page}} / {{pages}}</div>
+    </body>
+</html>

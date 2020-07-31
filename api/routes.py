@@ -1,4 +1,4 @@
-from flask import jsonify, request, Blueprint
+from flask import jsonify, request, Blueprint, render_template
 from models import ProteinModel, BindingSiteModel, GeneModel
 from db.database import db
 
@@ -12,6 +12,9 @@ def bindings():
    req_max = request.args.get('max', type=int)
    req_score_min = request.args.get('score_min', type=float)
    req_score_max = request.args.get('score_max', type=float)
+   page = request.args.get('page', type=int, default = 1)
+
+   sortby = request.args.get('sortby', type=str, default="protein_name")
 
    if(req_id==None and req_min==None and req_max == None and req_score_min == None and req_score_max == None):
       return "Supply arguments pls"
@@ -32,9 +35,18 @@ def bindings():
    if(req_score_max != None):
       filters.append(BindingSiteModel.score <= req_score_max)
 
-
    result = BindingSiteModel.query.filter(*filters)
-   return jsonify([log.serialize() for log in result])
+   
+   if(sortby == 'score'):
+      result = result.order_by(BindingSiteModel.score.desc())
+
+   if(sortby == "protein_name"):
+      result = result.order_by(BindingSiteModel.protein_name.desc())
+
+   pagination = result.paginate(page = page, per_page = 10)
+   serialized = [log.serialize() for log in pagination.items]
+   return render_template('test.html', rows=serialized, page = page, pages = pagination.pages)
+   # return jsonify(serialized)
 
 @genomic.route('/genes')
 def genes():
@@ -73,6 +85,7 @@ def proteins():
    result = ProteinModel.query.filter(*filters)
    return jsonify([log.serialize() for log in result])
 
+#TODO verify attributed, server crashes if wrong arguments supplied, try testing it, wrong datatype etc...
 @genomic.route('/join')
 #binding sites - protein
 def join():
@@ -87,10 +100,7 @@ def join():
    result = pagination.items
    results_dicts_array = [{**log.ProteinModel.serialize(), **log.BindingSiteModel.serialize()} for log in result]
    total_page_info = {'total_pages':pagination.pages}
-   return jsonify([total_page_info] + results_dicts_array)
-
-
-
-
+#    return jsonify([total_page_info] + results_dicts_array)
+   return render_template('test.html', rows=results_dicts_array, page=page, pages=pagination.pages)
 
 
