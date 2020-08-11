@@ -4,8 +4,10 @@ from sqlalchemy.orm import sessionmaker
 import psycopg2
 from flask_sqlalchemy import SQLAlchemy
 
+from db.config import SQLALCHEMY_DATABASE_URL
 
-SQLALCHEMY_DATABASE_URL = 'postgresql://postgres:***REMOVED***@localhost/mytestdb2'
+# put this shit into config.py you piece of cake
+# SQLALCHEMY_DATABASE_URL = 'postgresql://postgres:***REMOVED***@localhost/mytestdb2'
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, 
