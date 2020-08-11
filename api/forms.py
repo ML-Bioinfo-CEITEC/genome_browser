@@ -7,7 +7,7 @@ class SearchForm(FlaskForm):
     chromozom = StringField('chromozom')
     # protein_name = StringField('protein name', validators=[DataRequired()])
     protein_name = StringField('protein name')
-    sort_by = SelectField('sort by', choices=["score", "protein_name"], default="protein_name")
+    sort_by = SelectField('sort by', choices=["score", "protein_name"])
     area_min = IntegerField('area min',
             validators=[
                 Optional()

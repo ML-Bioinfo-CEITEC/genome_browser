@@ -102,10 +102,12 @@ def search():
 
    serialized = [log.serialize() for log in pagination.items]
 
+   #TODO hacking is my life
    if area_min == None:
       area_min = ''
    if area_max == None:
       area_max = ''
+   searchform.sort_by.data = sortby
 
    return render_template(
       'test.html', 
