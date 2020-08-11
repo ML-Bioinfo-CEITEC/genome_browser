@@ -8,6 +8,8 @@ from db.database import db
 app = Flask(__name__)
 #TODO URI vs URL
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URL
+#TODO remove in production
+app.config['DEBUG'] = True
 # db = SQLAlchemy(app)
 db.init_app(app)
 #TODO migrations?
