@@ -10,6 +10,8 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URL
 #TODO remove in production
 app.config['DEBUG'] = True
+#Sectet key is needed because of forms https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-iii-web-forms
+app.config['SECRET_KEY'] = 'muchos gracios'
 # db = SQLAlchemy(app)
 db.init_app(app)
 #TODO migrations?
