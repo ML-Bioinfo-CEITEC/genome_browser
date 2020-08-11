@@ -7,14 +7,26 @@
             {{ form.hidden_tag() }}
             <p>
                 {{ form.chromozom.label }}<br>
-                {{ form.chromozom(size=32, value=chromozom_default) }}
+                {{ form.chromozom(size=16, value=chromozom_default) }}
             </p>
             <p>
                 {{ form.protein_name.label }}<br>
-                {{ form.protein_name(size=32, value=protein_default) }}
+                {{ form.protein_name(size=16, value=protein_default) }}
+            </p>
+            <p>
+                {{ form.sort_by.label }}<br>
+                {{ form.sort_by(size=16, value=sort_by_default) }}
             </p>
             <p>{{form.submit()}}</p>
         </form>
+        {%if has_prev %}
+        <a href="{{ prev_page_url }}">PREVIOUS</a>
+        {% endif %}
+        {%if has_next %}
+        <a href="{{ next_page_url }}">NEXT</a>
+        {% endif %}
+        <div>Page {{page}} / {{pages}}</div>
+        <div>_____________</div>
         <table style="width:100%">
             
             <tbody>
@@ -33,8 +45,12 @@
             </tbody>
         </table>
         <div>_____________</div>
+        {%if has_prev %}
         <a href="{{ prev_page_url }}">PREVIOUS</a>
+        {% endif %}
+        {%if has_next %}
         <a href="{{ next_page_url }}">NEXT</a>
+        {% endif %}
         <div>Page {{page}} / {{pages}}</div>
     </body>
 </html>

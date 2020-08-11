@@ -11,14 +11,18 @@ genomic = Blueprint('genomic', __name__)
 #TODO empty result - crashes
 #TODO convert to POST request (has body) on searching, so params don't clutter url bar
 #TODO csrf token in url - takes space
+#TODO add cache for back button etc?
 def search():
    #check for search form sumbission
    searchform = SearchForm()
+
+   #If form is not valid, this if is False!!! 
    if(searchform.validate_on_submit()):
       params = {}
       for fieldname, value in searchform.data.items():
          if value and fieldname!='submit':
             params[fieldname] = value
+            print(fieldname, value)
       return redirect(
          url_for(
             'genomic.search', 
@@ -28,6 +32,12 @@ def search():
       )
 
    #get parameters from url
+
+   #TODO in progress non-null params
+   # print(request.args)
+   # params_to_watch = ['protein_name', 'chromozom', 'sort_by', 'page']
+
+
    #protein
    protein = request.args.get('protein_name', type=str, default="")
    #genomic location (genes start/end)
@@ -60,6 +70,7 @@ def search():
    if(score_min!=None): filters.append(BindingSiteModel.score >= score_min)
    if(score_max!=None): filters.append(BindingSiteModel.score <= score_max)
 
+   
    #bulding the query
    #Legacy query - querying all models, not only binding site
    #TODO when i query(ProteinModel) only, i get only 1 on page and multiple results, wtf?
@@ -69,6 +80,7 @@ def search():
    # query = query.join(GeneModel, GeneModel.chr == BindingSiteModel.chr)
    # query = query.filter(*filters)
 
+   #TODO remove joins if they are not necessary
    query = BindingSiteModel.query.join(ProteinModel, ProteinModel.protein_name == BindingSiteModel.protein_name)
    query = query.join(GeneModel, GeneModel.symbol == BindingSiteModel.protein_name)
    # query = query.distinct(BindingSiteModel.id)
@@ -82,7 +94,7 @@ def search():
    # print(query)
 
 
-   pagination = query.paginate(page=page, per_page = 25)
+   pagination = query.paginate(page=page, per_page = 15)
    # print(len(pagination.items))
 
    if(len(pagination.items) == 0):
@@ -95,10 +107,14 @@ def search():
       page = page, 
       pages = pagination.pages,
       #TODO add other parameters
-      #TODO if next/prev page exists
-      prev_page_url = url_for('genomic.search', page=page-1, chromozom=chromozom, protein_name=protein),
-      next_page_url = url_for('genomic.search', page=page+1, chromozom=chromozom, protein_name=protein),
+      prev_page_url = url_for('genomic.search', page=page-1, chromozom=chromozom, protein_name=protein, sort_by=sortby),
+      next_page_url = url_for('genomic.search', page=page+1, chromozom=chromozom, protein_name=protein, sort_by=sortby),
+      has_prev = pagination.has_prev,
+      has_next = pagination.has_next,
       form = searchform,
       chromozom_default = chromozom,
       protein_default = protein,
+      sort_by_default = sortby,
+      # area_min_default = area_min,
+      # area_max_default = area_max
    )
