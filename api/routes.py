@@ -41,7 +41,7 @@ def search():
    #protein
    protein = request.args.get('protein_name', type=str, default="")
    #genomic location (genes start/end)
-   loc_min = request.args.get('loc_min', type=int)
+   loc_min = request.args.get('loc_min', type=int,)
    loc_max = request.args.get('loc_max', type=int)
    #chromozom
    chromozom = request.args.get('chromozom', type=str, default="")
@@ -101,6 +101,12 @@ def search():
       return "No results found bruh \n" + str(query )
 
    serialized = [log.serialize() for log in pagination.items]
+   
+   if area_min == None:
+      area_min = ''
+   if area_max == None:
+      area_max = ''
+
    return render_template(
       'test.html', 
       rows=serialized, 
@@ -115,6 +121,6 @@ def search():
       chromozom_default = chromozom,
       protein_default = protein,
       sort_by_default = sortby,
-      # area_min_default = area_min,
-      # area_max_default = area_max
+      area_min_default = area_min,
+      area_max_default = area_max,
    )
