@@ -41,20 +41,20 @@ def search():
    #protein
    protein = request.args.get('protein_name', type=str, default="")
    #genomic location (genes start/end)
-   loc_min = request.args.get('loc_min', type=int,)
+   loc_min = request.args.get('loc_min', type=int)
    loc_max = request.args.get('loc_max', type=int)
    #chromozom
    chromozom = request.args.get('chromozom', type=str, default="")
    #gene area (binding site start/end ?)
-   area_min = request.args.get('area_min', type=int)
-   area_max = request.args.get('area_max', type=int)
+   area_min = request.args.get('area_min', type=int, default="")
+   area_max = request.args.get('area_max', type=int, default="")
    #score ?
    score_min = request.args.get('score_min', type=float)
    score_max = request.args.get('score_max', type=float)
 
    #control elements
    page = request.args.get('page', type=int, default = 1)
-   sortby = request.args.get('sort_by', type=str, default="protein_name")
+   sortby = request.args.get('sort_by', type=str, default='protein_name')
 
    #building the filters from parameters
    filters = []
@@ -65,8 +65,8 @@ def search():
 
    #checks if not None and if not empty string
    if(chromozom): filters.append(BindingSiteModel.chr == chromozom)
-   if(area_min!=None): filters.append(BindingSiteModel.start >= area_min)
-   if(area_max!=None): filters.append(BindingSiteModel.end <= area_max)
+   if(area_min): filters.append(BindingSiteModel.start >= area_min)
+   if(area_max): filters.append(BindingSiteModel.end <= area_max)
    if(score_min!=None): filters.append(BindingSiteModel.score >= score_min)
    if(score_max!=None): filters.append(BindingSiteModel.score <= score_max)
 
@@ -89,7 +89,7 @@ def search():
    #sorting
    #.desc() is redundant?
    if(sortby == 'score'): query = query.order_by(BindingSiteModel.score.desc())
-   if(sortby == "protein_name"): query = query.order_by(BindingSiteModel.protein_name.desc())
+   if(sortby == 'protein_name'): query = query.order_by(BindingSiteModel.protein_name.desc())
 
    # print(query)
 
@@ -101,7 +101,7 @@ def search():
       return "No results found bruh \n" + str(query )
 
    serialized = [log.serialize() for log in pagination.items]
-   
+
    if area_min == None:
       area_min = ''
    if area_max == None:
@@ -113,8 +113,8 @@ def search():
       page = page, 
       pages = pagination.pages,
       #TODO add other parameters
-      prev_page_url = url_for('genomic.search', page=page-1, chromozom=chromozom, protein_name=protein, sort_by=sortby),
-      next_page_url = url_for('genomic.search', page=page+1, chromozom=chromozom, protein_name=protein, sort_by=sortby),
+      prev_page_url = url_for('genomic.search', page=page-1, chromozom=chromozom, protein_name=protein, sort_by=sortby, area_min = area_min, area_max = area_max),
+      next_page_url = url_for('genomic.search', page=page+1, chromozom=chromozom, protein_name=protein, sort_by=sortby, area_min = area_min, area_max = area_max),
       has_prev = pagination.has_prev,
       has_next = pagination.has_next,
       form = searchform,
