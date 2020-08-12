@@ -94,11 +94,9 @@ def search():
    if(sortby == 'score_asc'): query = query.order_by(BindingSiteModel.score.asc())
    if(sortby == 'protein_name_asc'): query = query.order_by(BindingSiteModel.protein_name.asc())
 
-
    # print(query)
 
-
-   pagination = query.paginate(page=page, per_page = 15)
+   pagination = query.paginate(page=page, per_page = 25)
    # print(len(pagination.items))
 
    if(len(pagination.items) == 0):

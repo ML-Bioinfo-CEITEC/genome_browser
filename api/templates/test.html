@@ -3,70 +3,67 @@
         <title>Gene search</title>
     </head>
     <body>
-        <form method="POST" action="" nonvalidate>
-            {{ form.hidden_tag() }}
-            <p>
-                {{ form.chromozom.label }}<br>
-                {{ form.chromozom(size=16, value=chromozom_default) }}
-            </p>
-            <p>
-                {{ form.protein_name.label }}<br>
-                {{ form.protein_name(size=16, value=protein_default) }}
-            </p>
-            <p>
-                {{ form.area_min.label }}<br>
-                {{ form.area_min(size=16, value=area_min_default) }}
-            </p>
-            <p>
-                {{ form.area_max.label }}<br>
-                {{ form.area_max(size=16, value=area_max_default) }}
-            </p>
-            <p>
-                {{ form.loc_min.label }}<br>
-                {{ form.loc_min(size=16, value=loc_min_default) }}
-            </p>
-            <p>
-                {{ form.loc_max.label }}<br>
-                {{ form.loc_max(size=16, value=loc_max_default) }}
-            </p>
-            <p>
-                {{ form.sort_by.label }}<br>
-                {{ form.sort_by(size=4) }}
-            </p>
-            <p>{{form.submit()}}</p>
-        </form>
-        {%if has_prev %}
-        <a href="{{ prev_page_url }}">PREVIOUS</a>
-        {% endif %}
-        {%if has_next %}
-        <a href="{{ next_page_url }}">NEXT</a>
-        {% endif %}
-        <div>Page {{page}} / {{pages}}</div>
-        <div>_____________</div>
-        <table style="width:100%">
-            
-            <tbody>
-                <tr>
-                    {% for key, value in rows[0].items()%}
-                    <td>{{key}}</td>
-                    {% endfor %}
-                </tr>    
-                {% for row in rows%}
-                <tr>
-                    {% for key, value in row.items()%}
-                    <td>{{value}}</td>
-                    {% endfor %}
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <div>_____________</div>
-        {%if has_prev %}
-        <a href="{{ prev_page_url }}">PREVIOUS</a>
-        {% endif %}
-        {%if has_next %}
-        <a href="{{ next_page_url }}">NEXT</a>
-        {% endif %}
-        <div>Page {{page}} / {{pages}}</div>
+        <div style="width: 100%">
+            <div style="width:200px; float: left;">
+                <form method="POST" action="" nonvalidate>
+                    {{ form.hidden_tag() }}
+                    <p>
+                        {{ form.chromozom.label }}<br>
+                        {{ form.chromozom(size=16, value=chromozom_default) }}
+                    </p>
+                    <p>
+                        {{ form.protein_name.label }}<br>
+                        {{ form.protein_name(size=16, value=protein_default) }}
+                    </p>
+                    <p>
+                        {{ form.area_min.label }}<br>
+                        {{ form.area_min(size=16, value=area_min_default) }}
+                    </p>
+                    <p>
+                        {{ form.area_max.label }}<br>
+                        {{ form.area_max(size=16, value=area_max_default) }}
+                    </p>
+                    <p>
+                        {{ form.loc_min.label }}<br>
+                        {{ form.loc_min(size=16, value=loc_min_default) }}
+                    </p>
+                    <p>
+                        {{ form.loc_max.label }}<br>
+                        {{ form.loc_max(size=16, value=loc_max_default) }}
+                    </p>
+                    <p>
+                        {{ form.sort_by.label }}<br>
+                        {{ form.sort_by(size=4) }}
+                    </p>
+                    <p>{{form.submit()}}</p>
+                </form>
+            </div>
+            <div style="margin-left: 220px;">
+                <table style="width:100%">
+                    
+                    <tbody>
+                        <tr>
+                            {% for key, value in rows[0].items()%}
+                            <td>{{key}}</td>
+                            {% endfor %}
+                        </tr>    
+                        {% for row in rows%}
+                        <tr>
+                            {% for key, value in row.items()%}
+                            <td>{{value}}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {%if has_prev %}
+                <a href="{{ prev_page_url }}">PREVIOUS</a>
+                {% endif %}
+                {%if has_next %}
+                <a href="{{ next_page_url }}">NEXT</a>
+                {% endif %}
+                <div>Page {{page}} / {{pages}}</div>
+            </div>
+        </div>
     </body>
 </html>
