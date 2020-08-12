@@ -20,7 +20,8 @@ def search():
    if(searchform.validate_on_submit()):
       params = {}
       for fieldname, value in searchform.data.items():
-         if value and fieldname!='submit':
+         #TODO resolve the token in url some other way, why is it in there in the first place?
+         if value and fieldname!='submit' and fieldname!='csrf_token':
             params[fieldname] = value
             print(fieldname, value)
       return redirect(
@@ -41,8 +42,8 @@ def search():
    #protein
    protein = request.args.get('protein_name', type=str, default="")
    #genomic location (genes start/end)
-   loc_min = request.args.get('loc_min', type=int)
-   loc_max = request.args.get('loc_max', type=int)
+   loc_min = request.args.get('loc_min', type=int, default="")
+   loc_max = request.args.get('loc_max', type=int, default="")
    #chromozom
    chromozom = request.args.get('chromozom', type=str, default="")
    #gene area (binding site start/end ?)
@@ -54,14 +55,14 @@ def search():
 
    #control elements
    page = request.args.get('page', type=int, default = 1)
-   sortby = request.args.get('sort_by', type=str, default='protein_name')
+   sortby = request.args.get('sort_by', type=str, default='protein_name_desc')
 
    #building the filters from parameters
    filters = []
    if(protein): filters.append(ProteinModel.protein_name == protein)
    
-   if(loc_min!=None): filters.append(GeneModel.start >= loc_min)
-   if(loc_max!=None): filters.append(GeneModel.end <= loc_max)
+   if(loc_min): filters.append(GeneModel.start >= loc_min)
+   if(loc_max): filters.append(GeneModel.end <= loc_max)
 
    #checks if not None and if not empty string
    if(chromozom): filters.append(BindingSiteModel.chr == chromozom)
@@ -88,8 +89,11 @@ def search():
 
    #sorting
    #.desc() is redundant?
-   if(sortby == 'score'): query = query.order_by(BindingSiteModel.score.desc())
-   if(sortby == 'protein_name'): query = query.order_by(BindingSiteModel.protein_name.desc())
+   if(sortby == 'score_desc'): query = query.order_by(BindingSiteModel.score.desc())
+   if(sortby == 'protein_name_desc'): query = query.order_by(BindingSiteModel.protein_name.desc())
+   if(sortby == 'score_asc'): query = query.order_by(BindingSiteModel.score.asc())
+   if(sortby == 'protein_name_asc'): query = query.order_by(BindingSiteModel.protein_name.asc())
+
 
    # print(query)
 
@@ -103,10 +107,15 @@ def search():
    serialized = [log.serialize() for log in pagination.items]
 
    #TODO hacking is my life
+   #resolve all defaults this way and don't pass to html?
    if area_min == None:
       area_min = ''
    if area_max == None:
       area_max = ''
+   if loc_min == None:
+      loc_min = ''
+   if loc_max == None:
+      loc_max = ''
    searchform.sort_by.data = sortby
 
    return render_template(
@@ -115,8 +124,8 @@ def search():
       page = page, 
       pages = pagination.pages,
       #TODO add other parameters
-      prev_page_url = url_for('genomic.search', page=page-1, chromozom=chromozom, protein_name=protein, sort_by=sortby, area_min = area_min, area_max = area_max),
-      next_page_url = url_for('genomic.search', page=page+1, chromozom=chromozom, protein_name=protein, sort_by=sortby, area_min = area_min, area_max = area_max),
+      prev_page_url = url_for('genomic.search', page=page-1, chromozom=chromozom, protein_name=protein, sort_by=sortby, area_min = area_min, area_max = area_max, loc_min=loc_min, loc_max=loc_max),
+      next_page_url = url_for('genomic.search', page=page+1, chromozom=chromozom, protein_name=protein, sort_by=sortby, area_min = area_min, area_max = area_max, loc_min=loc_min, loc_max=loc_max),
       has_prev = pagination.has_prev,
       has_next = pagination.has_next,
       form = searchform,
@@ -125,4 +134,6 @@ def search():
       sort_by_default = sortby,
       area_min_default = area_min,
       area_max_default = area_max,
+      loc_min_default = loc_min,
+      loc_max_default = loc_max,
    )
