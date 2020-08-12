@@ -2,6 +2,7 @@ from flask import jsonify, request, Blueprint, render_template, url_for, redirec
 from models import ProteinModel, BindingSiteModel, GeneModel
 from db.database import db
 from forms import SearchForm
+from copy import deepcopy
 
 genomic = Blueprint('genomic', __name__)
 
@@ -10,7 +11,6 @@ genomic = Blueprint('genomic', __name__)
 #TODO verify attributed, server crashes if wrong arguments supplied, try testing it, wrong datatype etc...
 #TODO empty result - crashes
 #TODO convert to POST request (has body) on searching, so params don't clutter url bar
-#TODO csrf token in url - takes space
 #TODO add cache for back button etc?
 def search():
    #check for search form sumbission
@@ -35,8 +35,8 @@ def search():
    #get parameters from url
 
    #TODO in progress non-null params
-   # print(request.args)
-   # params_to_watch = ['protein_name', 'chromozom', 'sort_by', 'page']
+   
+   params_to_watch = ['protein_name', 'chromozom', 'sort_by', 'page']
 
 
    #protein
@@ -116,14 +116,16 @@ def search():
       loc_max = ''
    searchform.sort_by.data = sortby
 
+   args_without_page = {key: value for key, value in request.args.items() if key != 'page'}
+
    return render_template(
       'test.html', 
       rows=serialized, 
       page = page, 
       pages = pagination.pages,
       #TODO add other parameters
-      prev_page_url = url_for('genomic.search', page=page-1, chromozom=chromozom, protein_name=protein, sort_by=sortby, area_min = area_min, area_max = area_max, loc_min=loc_min, loc_max=loc_max),
-      next_page_url = url_for('genomic.search', page=page+1, chromozom=chromozom, protein_name=protein, sort_by=sortby, area_min = area_min, area_max = area_max, loc_min=loc_min, loc_max=loc_max),
+      prev_page_url = url_for('genomic.search', page=page-1, **args_without_page),
+      next_page_url = url_for('genomic.search', page=page+1, **args_without_page),
       has_prev = pagination.has_prev,
       has_next = pagination.has_next,
       form = searchform,
