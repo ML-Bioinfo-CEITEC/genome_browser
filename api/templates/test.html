@@ -39,16 +39,16 @@
                 </form>
             </div>
             <div style="margin-left: 220px;">
-                <table style="width:100%">
+                <table style="width:100%; border:1px solid lightgrey; border-collapse: collapse;">
                     
                     <tbody>
-                        <tr>
+                        <tr style="border: 1px solid lightgrey;">
                             {% for key, value in rows[0].items()%}
                             <td>{{key}}</td>
                             {% endfor %}
                         </tr>    
                         {% for row in rows%}
-                        <tr>
+                        <tr style="border: 1px solid lightgrey;">
                             {% for key, value in row.items()%}
                             <td>{{value}}</td>
                             {% endfor %}
