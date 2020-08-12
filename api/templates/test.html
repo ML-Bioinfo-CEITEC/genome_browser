@@ -39,6 +39,7 @@
                 </form>
             </div>
             <div style="margin-left: 220px;">
+                {% if rows | length > 0 %}
                 <table style="width:100%; border:1px solid lightgrey; border-collapse: collapse;">
                     
                     <tbody>
@@ -63,6 +64,8 @@
                 <a href="{{ next_page_url }}">NEXT</a>
                 {% endif %}
                 <div>Page {{page}} / {{pages}}</div>
+                {% endif %}
+
             </div>
         </div>
     </body>

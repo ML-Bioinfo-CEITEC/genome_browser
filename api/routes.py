@@ -99,8 +99,8 @@ def search():
    pagination = query.paginate(page=page, per_page = 25)
    # print(len(pagination.items))
 
-   if(len(pagination.items) == 0):
-      return "No results found bruh \n" + str(query )
+   # if(len(pagination.items) == 0):
+   #    return "No results found bruh \n" + str(query )
 
    serialized = [log.serialize() for log in pagination.items]
 
