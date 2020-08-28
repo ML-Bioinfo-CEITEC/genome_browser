@@ -12,6 +12,7 @@ class ProteinModel(db.Model, Protein):
 class BindingSiteModel(db.Model, BindingSite):
    def serialize(self):
       return {
+         'id':self.id,
          'protein_name':self.protein_name,
          'chr':self.chr,
          'start':self.start,

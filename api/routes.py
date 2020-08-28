@@ -72,19 +72,20 @@ def search():
    if(score_max!=None): filters.append(BindingSiteModel.score <= score_max)
 
    
-   #bulding the query
+   #bulding the query 
    #Legacy query - querying all models, not only binding site
-   #TODO when i query(ProteinModel) only, i get only 1 on page and multiple results, wtf?
    #TODO order joins properly
-   # query = db.session.query(ProteinModel, BindingSiteModel, GeneModel)
-   # query = query.join(BindingSiteModel, ProteinModel.protein_name == BindingSiteModel.protein_name)
+   # query = db.session.query(BindingSiteModel, ProteinModel.protein_name, GeneModel.symbol)
+   # query = query.join(ProteinModel, ProteinModel.protein_name == BindingSiteModel.protein_name)
    # query = query.join(GeneModel, GeneModel.chr == BindingSiteModel.chr)
    # query = query.filter(*filters)
 
-   #TODO remove joins if they are not necessary
    query = BindingSiteModel.query.join(ProteinModel, ProteinModel.protein_name == BindingSiteModel.protein_name)
-   query = query.join(GeneModel, GeneModel.symbol == BindingSiteModel.protein_name)
-   # query = query.distinct(BindingSiteModel.id)
+   query = query.join(GeneModel, (GeneModel.symbol == BindingSiteModel.protein_name) & (GeneModel.chr == BindingSiteModel.chr))
+   #TODO uncomment this later, in testing dataset, there are no fitting datapoints  ,>= or > ?
+      # & (BindingSiteModel.end > GeneModel.start) & (BindingSiteModel.start < GeneModel.end))
+
+   query = query.add_columns(GeneModel.symbol, GeneModel.start, GeneModel.end)
    query = query.filter(*filters)
 
    #sorting
@@ -97,12 +98,9 @@ def search():
    # print(query)
 
    pagination = query.paginate(page=page, per_page = 25)
-   # print(len(pagination.items))
-
-   # if(len(pagination.items) == 0):
-   #    return "No results found bruh \n" + str(query )
-
-   serialized = [log.serialize() for log in pagination.items]
+   
+   #TODO remove gene start and end, it's there just for our check
+   serialized = [{**log.BindingSiteModel.serialize(), "Gene symbol":log[1], "Gen start":log[2], "Gen end":log[3]} for log in pagination.items]
 
    #TODO hacking is my life
    #resolve all defaults this way and don't pass to html?
