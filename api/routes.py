@@ -85,7 +85,8 @@ def search():
    #TODO uncomment this later, in testing dataset, there are no fitting datapoints  ,>= or > ?
       # & (BindingSiteModel.end > GeneModel.start) & (BindingSiteModel.start < GeneModel.end))
 
-   query = query.add_columns(GeneModel.symbol, GeneModel.start, GeneModel.end)
+   #TODO why do we display gene symbol (its the same as protein name always, we are joining on that!)
+   query = query.add_columns(GeneModel.symbol, GeneModel.start, GeneModel.end, ProteinModel.uniprot_url)
    query = query.filter(*filters)
 
    #sorting
@@ -100,7 +101,7 @@ def search():
    pagination = query.paginate(page=page, per_page = 25)
    
    #TODO remove gene start and end, it's there just for our check
-   serialized = [{**log.BindingSiteModel.serialize(), "Gene symbol":log[1], "Gen start":log[2], "Gen end":log[3]} for log in pagination.items]
+   serialized = [{**log.BindingSiteModel.serialize(), "Gene symbol":log[1], "Gen start":log[2], "Gen end":log[3], "Protein url":log[4]} for log in pagination.items]
 
    #TODO hacking is my life
    #resolve all defaults this way and don't pass to html?

@@ -45,13 +45,20 @@
                     <tbody>
                         <tr style="border: 1px solid lightgrey;">
                             {% for key, value in rows[0].items()%}
-                            <td>{{key}}</td>
+                                {% if key != 'Protein url'%}
+                                <td>{{key}}</td>
+                                {%endif%}
                             {% endfor %}
                         </tr>    
                         {% for row in rows%}
                         <tr style="border: 1px solid lightgrey;">
                             {% for key, value in row.items()%}
-                            <td>{{value}}</td>
+                                <!-- TODO hardcoded protein_name and Protein url names - parametrize? -->
+                                {% if (key == "protein_name" or key=='Gene symbol')%}
+                                <td><a href="{{row['Protein url']}}">{{value}}</a></td>
+                                {% elif key!= 'Protein url'%}
+                                <td>{{value}}</td>
+                                {%endif%}
                             {% endfor %}
                         </tr>
                         {% endfor %}
