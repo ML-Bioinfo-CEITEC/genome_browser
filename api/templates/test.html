@@ -56,6 +56,8 @@
                                 <!-- TODO hardcoded protein_name and Protein url names - parametrize? -->
                                 {% if (key == "protein_name" or key=='Gene symbol')%}
                                 <td><a href="{{row['Protein url']}}">{{value}}</a></td>
+                                {%elif key == 'score'%}
+                                <td>{{value|round(3, 'floor')}}</td>
                                 {% elif key!= 'Protein url'%}
                                 <td>{{value}}</td>
                                 {%endif%}
