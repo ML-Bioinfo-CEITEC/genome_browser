@@ -41,6 +41,9 @@ def search():
 
    #protein
    protein = request.args.get('protein_name', type=str, default="")
+   symbol = request.args.get('symbol', type=str, default="")
+   gene_id = request.args.get('gene_id', type=str, default="")
+
    #genomic location (genes start/end)
    loc_min = request.args.get('loc_min', type=int, default="")
    loc_max = request.args.get('loc_max', type=int, default="")
@@ -50,8 +53,8 @@ def search():
    area_min = request.args.get('area_min', type=int, default="")
    area_max = request.args.get('area_max', type=int, default="")
    #score ?
-   score_min = request.args.get('score_min', type=float)
-   score_max = request.args.get('score_max', type=float)
+   score_min = request.args.get('score_min', type=float, default="")
+   # score_max = request.args.get('score_max', type=float)
 
    #control elements
    page = request.args.get('page', type=int, default = 1)
@@ -60,6 +63,8 @@ def search():
    #building the filters from parameters
    filters = []
    if(protein): filters.append(ProteinModel.protein_name == protein)
+   if(symbol): filters.append(GeneModel.symbol == symbol)
+   if(gene_id): filters.append(GeneModel.id == gene_id)
    
    if(loc_min): filters.append(GeneModel.start >= loc_min)
    if(loc_max): filters.append(GeneModel.end <= loc_max)
@@ -68,8 +73,8 @@ def search():
    if(chromozom): filters.append(BindingSiteModel.chr == chromozom)
    if(area_min): filters.append(BindingSiteModel.start >= area_min)
    if(area_max): filters.append(BindingSiteModel.end <= area_max)
-   if(score_min!=None): filters.append(BindingSiteModel.score >= score_min)
-   if(score_max!=None): filters.append(BindingSiteModel.score <= score_max)
+   if(score_min): filters.append(BindingSiteModel.score >= score_min)
+   # if(score_max!=None): filters.append(BindingSiteModel.score <= score_max)
 
    
    #bulding the query 
@@ -113,6 +118,8 @@ def search():
       loc_min = ''
    if loc_max == None:
       loc_max = ''
+   if score_min == None:
+      score_min = ''
    searchform.sort_by.data = sortby
 
    args_without_page = {key: value for key, value in request.args.items() if key != 'page'}
@@ -130,9 +137,12 @@ def search():
       form = searchform,
       chromozom_default = chromozom,
       protein_default = protein,
+      symbol_default = symbol,
       sort_by_default = sortby,
       area_min_default = area_min,
       area_max_default = area_max,
       loc_min_default = loc_min,
       loc_max_default = loc_max,
+      score_min_default = score_min,
+      gene_id_default = gene_id,
    )

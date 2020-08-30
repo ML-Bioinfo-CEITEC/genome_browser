@@ -16,6 +16,14 @@
                         {{ form.protein_name(size=16, value=protein_default) }}
                     </p>
                     <p>
+                        {{ form.gene_id.label }}<br>
+                        {{ form.gene_id(size=16, value=gene_id_default) }}
+                    </p>
+                    <p>
+                        {{ form.symbol.label }}<br>
+                        {{ form.symbol(size=16, value=symbol_default) }}
+                    </p>
+                    <p>
                         {{ form.area_min.label }}<br>
                         {{ form.area_min(size=16, value=area_min_default) }}
                     </p>
@@ -30,6 +38,10 @@
                     <p>
                         {{ form.loc_max.label }}<br>
                         {{ form.loc_max(size=16, value=loc_max_default) }}
+                    </p>
+                    <p>
+                        {{ form.score_min.label }}<br>
+                        {{ form.score_min(size=16, value=score_min_default) }}
                     </p>
                     <p>
                         {{ form.sort_by.label }}<br>

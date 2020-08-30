@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, RadioField, IntegerField, SelectField
+from wtforms import StringField, SubmitField, RadioField, IntegerField, SelectField, FloatField
 from wtforms.validators import DataRequired, Optional
 
 class SearchForm(FlaskForm):
@@ -7,6 +7,8 @@ class SearchForm(FlaskForm):
     chromozom = StringField('chromozom')
     # protein_name = StringField('protein name', validators=[DataRequired()])
     protein_name = StringField('protein name')
+    symbol = StringField('gene symbol')
+    gene_id = StringField('gene id')
     sort_by = SelectField('sort by', choices=["score_desc","score_asc", "protein_name_desc", "protein_name_asc"])
     area_min = IntegerField('binding location min',
             validators=[
@@ -24,6 +26,12 @@ class SearchForm(FlaskForm):
             ]
         )
     loc_max = IntegerField('gene location max',
+            validators=[
+                Optional()
+            ]
+        )
+
+    score_min = FloatField('score min',
             validators=[
                 Optional()
             ]
