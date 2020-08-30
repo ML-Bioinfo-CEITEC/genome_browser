@@ -3,6 +3,8 @@ from models import ProteinModel, BindingSiteModel, GeneModel
 from db.database import db
 from forms import SearchForm
 from copy import deepcopy
+from flask_table import Table, Col, LinkCol
+from flask_table.html import element
 
 genomic = Blueprint('genomic', __name__)
 
@@ -95,18 +97,45 @@ def search():
    query = query.filter(*filters)
 
    #sorting
-   #.desc() is redundant?
-   if(sortby == 'score_desc'): query = query.order_by(BindingSiteModel.score.desc())
-   if(sortby == 'protein_name_desc'): query = query.order_by(BindingSiteModel.protein_name.desc())
+   #TODO make another argument direction, instead of hardcoding every combination
    if(sortby == 'score_asc'): query = query.order_by(BindingSiteModel.score.asc())
+   if(sortby == 'score_desc'): query = query.order_by(BindingSiteModel.score.desc())
+
    if(sortby == 'protein_name_asc'): query = query.order_by(BindingSiteModel.protein_name.asc())
+   if(sortby == 'protein_name_desc'): query = query.order_by(BindingSiteModel.protein_name.desc())
+
+   if(sortby == 'chr_asc'): query = query.order_by(GeneModel.chr.asc())
+   if(sortby == 'chr_desc'): query = query.order_by(GeneModel.chr.desc())
+
+   if(sortby == 'start_asc'): query = query.order_by(BindingSiteModel.start.asc())
+   if(sortby == 'start_desc'): query = query.order_by(BindingSiteModel.start.desc())
+
+   if(sortby == 'end_asc'): query = query.order_by(BindingSiteModel.end.asc())
+   if(sortby == 'end_desc'): query = query.order_by(BindingSiteModel.end.desc())
+
+   if(sortby == 'strand_asc'): query = query.order_by(BindingSiteModel.strand.asc())
+   if(sortby == 'strand_desc'): query = query.order_by(BindingSiteModel.strand.desc())
+  
+   if(sortby == 'symbol_asc'): query = query.order_by(GeneModel.symbol.asc())
+   if(sortby == 'symbol_desc'): query = query.order_by(GeneModel.symbol.desc())
+
+   if(sortby == 'gene_start_asc'): query = query.order_by(GeneModel.start.asc())
+   if(sortby == 'gene_start_desc'): query = query.order_by(GeneModel.start.desc())
+
+   if(sortby == 'gene_end_asc'): query = query.order_by(GeneModel.end.asc())
+   if(sortby == 'gene_end_desc'): query = query.order_by(GeneModel.end.desc())
+
+   if(sortby == 'id_asc'): query = query.order_by(BindingSiteModel.id.asc())
+   if(sortby == 'id_desc'): query = query.order_by(BindingSiteModel.id.desc())
+
+
 
    # print(query)
 
    pagination = query.paginate(page=page, per_page = 25)
    
    #TODO remove gene start and end, it's there just for our check
-   serialized = [{**log.BindingSiteModel.serialize(), "Gene symbol":log[1], "Gen start":log[2], "Gen end":log[3], "Protein url":log[4]} for log in pagination.items]
+   serialized = [{**log.BindingSiteModel.serialize(), "symbol":log[1], "gene_start":log[2], "gene_end":log[3], "Protein url":log[4]} for log in pagination.items]
 
    #TODO hacking is my life
    #resolve all defaults this way and don't pass to html?
@@ -120,12 +149,100 @@ def search():
       loc_max = ''
    if score_min == None:
       score_min = ''
-   searchform.sort_by.data = sortby
+   # searchform.sort_by.data = sortby
 
    args_without_page = {key: value for key, value in request.args.items() if key != 'page'}
 
+
+
+   #TABLECODE#################
+   #TODO extract elswhere
+   class ExternalUrlCol(Col):
+      def __init__(self, name, url_attr, **kwargs):
+         self.url_attr = url_attr
+         super(ExternalUrlCol, self).__init__(name, **kwargs)
+
+      def td_contents(self, item, attr_list):
+         text = self.from_attr_list(item, attr_list)
+         url = self.from_attr_list(item, [self.url_attr])
+         return element('a', {'href': url}, content=text)
+
+   class ScoreCol(Col):
+      def td_contents(self, item, attr_list):
+         return element('div', content=round(self.from_attr_list(item, 'score'), 3))
+
+   class MyTable(Table):
+      allow_sort = True
+      id=Col("Id")
+      protein_name = ExternalUrlCol(name="Protein name", url_attr='Protein url', attr='protein_name')
+      score = ScoreCol("Score", )
+      chr=Col("Chromozom")
+      start=Col("Start")
+      end=Col("End")
+      strand=Col("Strand")
+      note=Col("Note")
+      symbol=ExternalUrlCol(name="Gene symbol", url_attr='Protein url', attr='symbol')
+      gene_start=Col("Gene start")
+      gene_end=Col("Gene end")
+
+      def __init__(self, items, request, last_sort_type, html_attrs):
+         self.last_sort_type = last_sort_type
+         Table.__init__(self, items=items, html_attrs = html_attrs)
+
+      def sort_url(self, col_key, reverse=False):
+         args_without_sortby = {key: value for key, value in request.args.items() if key != 'sort_by'}
+
+
+         if(self.last_sort_type == 'asc'):
+            suffix = 'desc'
+         if(self.last_sort_type == 'desc'):
+            suffix = 'asc'
+
+         return url_for('genomic.search', **args_without_sortby, sort_by=col_key+'_'+suffix)
+
+
+   
+   sort_type_getter = {
+      'score_desc': 'desc',
+      'protein_name_desc': 'desc',
+      'chr_desc':'desc',
+      'start_desc':'desc',
+      'end_desc':'desc',
+      'strand_desc':'desc',
+      'symbol_desc':'desc',
+      'gene_start_desc':'desc',
+      'gene_end_desc':'desc',
+      'id_desc':'desc',
+
+      'score_asc':'asc',
+      'protein_name_asc':'asc',
+      'chr_asc':'asc',
+      'start_asc':'asc',
+      'end_asc':'asc',
+      'strand_asc':'asc',
+      'symbol_asc':'asc',
+      'gene_start_asc':'asc',
+      'gene_end_asc':'asc',
+      'id_asc':'asc'
+   }
+
+   table = MyTable(
+      # items=[{'protein_name': log['protein_name'], 'score':log['score'], 'chr':log['chr']} for log in serialized],
+      items=serialized,
+      request = request,
+      last_sort_type=sort_type_getter[sortby],
+      html_attrs={'style':'width:100%','border':'1px solid lightgrey'}
+   )
+   #TODO check the validity of sortby existing in dict
+   # table.set_last_sort(sort_type_getter[sortby])
+   #####################
+
+
+
+
    return render_template(
       'test.html', 
+      table = table,
       rows=serialized, 
       page = page, 
       pages = pagination.pages,

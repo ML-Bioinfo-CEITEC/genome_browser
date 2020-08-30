@@ -9,7 +9,6 @@ class SearchForm(FlaskForm):
     protein_name = StringField('protein name')
     symbol = StringField('gene symbol')
     gene_id = StringField('gene id')
-    sort_by = SelectField('sort by', choices=["score_desc","score_asc", "protein_name_desc", "protein_name_asc"])
     area_min = IntegerField('binding location min',
             validators=[
                 Optional()

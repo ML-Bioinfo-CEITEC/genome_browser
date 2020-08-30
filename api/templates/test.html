@@ -43,51 +43,23 @@
                         {{ form.score_min.label }}<br>
                         {{ form.score_min(size=16, value=score_min_default) }}
                     </p>
-                    <p>
-                        {{ form.sort_by.label }}<br>
-                        {{ form.sort_by(size=4) }}
-                    </p>
                     <p>{{form.submit()}}</p>
                 </form>
             </div>
             <div style="margin-left: 220px;">
-                {% if rows | length > 0 %}
-                <table style="width:100%; border:1px solid lightgrey; border-collapse: collapse;">
-                    
-                    <tbody>
-                        <tr style="border: 1px solid lightgrey;">
-                            {% for key, value in rows[0].items()%}
-                                {% if key != 'Protein url'%}
-                                <td>{{key}}</td>
-                                {%endif%}
-                            {% endfor %}
-                        </tr>    
-                        {% for row in rows%}
-                        <tr style="border: 1px solid lightgrey;">
-                            {% for key, value in row.items()%}
-                                <!-- TODO hardcoded protein_name and Protein url names - parametrize? -->
-                                {% if (key == "protein_name" or key=='Gene symbol')%}
-                                <td><a href="{{row['Protein url']}}">{{value}}</a></td>
-                                {%elif key == 'score'%}
-                                <td>{{value|round(3, 'floor')}}</td>
-                                {% elif key!= 'Protein url'%}
-                                <td>{{value}}</td>
-                                {%endif%}
-                            {% endfor %}
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                {%if has_prev %}
-                <a href="{{ prev_page_url }}">PREVIOUS</a>
-                {% endif %}
-                {%if has_next %}
-                <a href="{{ next_page_url }}">NEXT</a>
-                {% endif %}
-                <div>Page {{page}} / {{pages}}</div>
-                {% endif %}
-
+                {{table}}
             </div>
+            <div style="margin-left: 220px;">
+            {%if has_prev %}
+            <a href="{{ prev_page_url }}">PREVIOUS</a>
+            {% endif %}
+            {%if has_next %}
+            <a href="{{ next_page_url }}">NEXT</a>
+            {% endif %}
+            <div>Page {{page}} / {{pages}}</div>
+            </div>
+            
         </div>
+        
     </body>
 </html>
