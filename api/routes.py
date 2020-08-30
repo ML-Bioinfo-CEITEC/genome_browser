@@ -1,12 +1,77 @@
-from flask import jsonify, request, Blueprint, render_template, url_for, redirect
+from flask import jsonify, request, Blueprint, render_template, url_for, redirect, make_response, send_file
 from models import ProteinModel, BindingSiteModel, GeneModel
 from db.database import db
 from forms import SearchForm
 from copy import deepcopy
 from flask_table import Table, Col, LinkCol
 from flask_table.html import element
+import csv
 
 genomic = Blueprint('genomic', __name__)
+
+@genomic.route('/download')
+def download():
+   #TODO what if the data doesnt fit in RAM?
+   #TODO copypasted query building from search - extract!
+   #protein
+   protein = request.args.get('protein_name', type=str, default="")
+   symbol = request.args.get('symbol', type=str, default="")
+   gene_id = request.args.get('gene_id', type=str, default="")
+
+   #genomic location (genes start/end)
+   loc_min = request.args.get('loc_min', type=int, default="")
+   loc_max = request.args.get('loc_max', type=int, default="")
+   #chromozom
+   chromozom = request.args.get('chromozom', type=str, default="")
+   #gene area (binding site start/end ?)
+   area_min = request.args.get('area_min', type=int, default="")
+   area_max = request.args.get('area_max', type=int, default="")
+   #score ?
+   score_min = request.args.get('score_min', type=float, default="")
+
+   #control elements
+   page = request.args.get('page', type=int, default = 1)
+   sortby = request.args.get('sort_by', type=str, default='protein_name_desc')
+
+   #building the filters from parameters
+   filters = []
+   if(protein): filters.append(ProteinModel.protein_name == protein)
+   if(symbol): filters.append(GeneModel.symbol == symbol)
+   if(gene_id): filters.append(GeneModel.id == gene_id)
+   
+   if(loc_min): filters.append(GeneModel.start >= loc_min)
+   if(loc_max): filters.append(GeneModel.end <= loc_max)
+
+   #checks if not None and if not empty string
+   if(chromozom): filters.append(BindingSiteModel.chr == chromozom)
+   if(area_min): filters.append(BindingSiteModel.start >= area_min)
+   if(area_max): filters.append(BindingSiteModel.end <= area_max)
+   if(score_min): filters.append(BindingSiteModel.score >= score_min)
+   # if(score_max!=None): filters.append(BindingSiteModel.score <= score_max)
+
+   query = BindingSiteModel.query.join(ProteinModel, ProteinModel.protein_name == BindingSiteModel.protein_name)
+   query = query.join(GeneModel, (GeneModel.symbol == BindingSiteModel.protein_name) & (GeneModel.chr == BindingSiteModel.chr))
+
+   query = query.add_columns(GeneModel.symbol, GeneModel.start, GeneModel.end, ProteinModel.uniprot_url)
+   query = query.filter(*filters)
+
+   result = query.all()
+   
+   results = [{**log.BindingSiteModel.serialize(), "symbol":log[1], "gene_start":log[2], "gene_end":log[3], "Protein url":log[4]} for log in result]
+   if(len(results) == 0):
+      return "No results"
+
+   #TODO skip undesired keys
+   keys = results[0].keys()
+   #TODO delete csv afterwards?
+   with open('genomic_download.csv', 'w', newline='') as output_file:
+      dict_writer = csv.DictWriter(output_file, keys)
+      dict_writer.writeheader()
+      dict_writer.writerows(results)
+
+   return send_file('genomic_download.csv', mimetype='text/csv',
+                     attachment_filename='genomic_dowload.csv',
+                     as_attachment=True)
 
 @genomic.route('/search', methods=["GET","POST"])
 #TODO what if db is not running -> crashes
@@ -97,7 +162,7 @@ def search():
    query = query.filter(*filters)
 
    #sorting
-   #TODO make another argument direction, instead of hardcoding every combination
+   #TODO make another argument direction (desc, asc), instead of hardcoding every combination
    if(sortby == 'score_asc'): query = query.order_by(BindingSiteModel.score.asc())
    if(sortby == 'score_desc'): query = query.order_by(BindingSiteModel.score.desc())
 
@@ -237,9 +302,6 @@ def search():
    # table.set_last_sort(sort_type_getter[sortby])
    #####################
 
-
-
-
    return render_template(
       'test.html', 
       table = table,
@@ -249,6 +311,7 @@ def search():
       #TODO add other parameters
       prev_page_url = url_for('genomic.search', page=page-1, **args_without_page),
       next_page_url = url_for('genomic.search', page=page+1, **args_without_page),
+      download_url = url_for('genomic.download', **dict(request.args.items())),
       has_prev = pagination.has_prev,
       has_next = pagination.has_next,
       form = searchform,
