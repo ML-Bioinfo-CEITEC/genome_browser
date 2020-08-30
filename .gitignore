@@ -144,3 +144,4 @@ api/db/config.py
 # env ToDo: remove later
 pekarna0/
 PortableGit/
+api/genomic_download.csv
