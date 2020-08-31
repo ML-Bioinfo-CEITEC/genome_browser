@@ -12,49 +12,9 @@ genomic = Blueprint('genomic', __name__)
 @genomic.route('/download')
 def download():
    #TODO what if the data doesnt fit in RAM?
-   #TODO copypasted query building from search - extract!
-   #protein
-   protein = request.args.get('protein_name', type=str, default="")
-   symbol = request.args.get('symbol', type=str, default="")
-   gene_id = request.args.get('gene_id', type=str, default="")
 
-   #genomic location (genes start/end)
-   loc_min = request.args.get('loc_min', type=int, default="")
-   loc_max = request.args.get('loc_max', type=int, default="")
-   #chromozom
-   chromozom = request.args.get('chromozom', type=str, default="")
-   #gene area (binding site start/end ?)
-   area_min = request.args.get('area_min', type=int, default="")
-   area_max = request.args.get('area_max', type=int, default="")
-   #score ?
-   score_min = request.args.get('score_min', type=float, default="")
-
-   #control elements
-   page = request.args.get('page', type=int, default = 1)
-   sortby = request.args.get('sort_by', type=str, default='protein_name_desc')
-
-   #building the filters from parameters
-   filters = []
-   if(protein): filters.append(ProteinModel.protein_name == protein)
-   if(symbol): filters.append(GeneModel.symbol == symbol)
-   if(gene_id): filters.append(GeneModel.id == gene_id)
-   
-   if(loc_min): filters.append(GeneModel.start >= loc_min)
-   if(loc_max): filters.append(GeneModel.end <= loc_max)
-
-   #checks if not None and if not empty string
-   if(chromozom): filters.append(BindingSiteModel.chr == chromozom)
-   if(area_min): filters.append(BindingSiteModel.start >= area_min)
-   if(area_max): filters.append(BindingSiteModel.end <= area_max)
-   if(score_min): filters.append(BindingSiteModel.score >= score_min)
-   # if(score_max!=None): filters.append(BindingSiteModel.score <= score_max)
-
-   query = BindingSiteModel.query.join(ProteinModel, ProteinModel.protein_name == BindingSiteModel.protein_name)
-   query = query.join(GeneModel, (GeneModel.symbol == BindingSiteModel.protein_name) & (GeneModel.chr == BindingSiteModel.chr))
-
-   query = query.add_columns(GeneModel.symbol, GeneModel.start, GeneModel.end, ProteinModel.uniprot_url)
-   query = query.filter(*filters)
-
+   params = get_params_from_request(request)
+   query = get_query_from_params(params)
    result = query.all()
    
    results = [{**log.BindingSiteModel.serialize(), "symbol":log[1], "gene_start":log[2], "gene_end":log[3], "Protein url":log[4]} for log in result]
@@ -99,103 +59,22 @@ def search():
          )
       )
 
-   #get parameters from url
-
-   #TODO in progress non-null params
-   
-   params_to_watch = ['protein_name', 'chromozom', 'sort_by', 'page']
-
-
-   #protein
-   protein = request.args.get('protein_name', type=str, default="")
-   symbol = request.args.get('symbol', type=str, default="")
-   gene_id = request.args.get('gene_id', type=str, default="")
-
-   #genomic location (genes start/end)
-   loc_min = request.args.get('loc_min', type=int, default="")
-   loc_max = request.args.get('loc_max', type=int, default="")
-   #chromozom
-   chromozom = request.args.get('chromozom', type=str, default="")
-   #gene area (binding site start/end ?)
-   area_min = request.args.get('area_min', type=int, default="")
-   area_max = request.args.get('area_max', type=int, default="")
-   #score ?
-   score_min = request.args.get('score_min', type=float, default="")
-   # score_max = request.args.get('score_max', type=float)
-
-   #control elements
-   page = request.args.get('page', type=int, default = 1)
-   sortby = request.args.get('sort_by', type=str, default='protein_name_desc')
-
-   #building the filters from parameters
-   filters = []
-   if(protein): filters.append(ProteinModel.protein_name == protein)
-   if(symbol): filters.append(GeneModel.symbol == symbol)
-   if(gene_id): filters.append(GeneModel.id == gene_id)
-   
-   if(loc_min): filters.append(GeneModel.start >= loc_min)
-   if(loc_max): filters.append(GeneModel.end <= loc_max)
-
-   #checks if not None and if not empty string
-   if(chromozom): filters.append(BindingSiteModel.chr == chromozom)
-   if(area_min): filters.append(BindingSiteModel.start >= area_min)
-   if(area_max): filters.append(BindingSiteModel.end <= area_max)
-   if(score_min): filters.append(BindingSiteModel.score >= score_min)
-   # if(score_max!=None): filters.append(BindingSiteModel.score <= score_max)
-
-   
-   #bulding the query 
-   #Legacy query - querying all models, not only binding site
-   #TODO order joins properly
-   # query = db.session.query(BindingSiteModel, ProteinModel.protein_name, GeneModel.symbol)
-   # query = query.join(ProteinModel, ProteinModel.protein_name == BindingSiteModel.protein_name)
-   # query = query.join(GeneModel, GeneModel.chr == BindingSiteModel.chr)
-   # query = query.filter(*filters)
-
-   query = BindingSiteModel.query.join(ProteinModel, ProteinModel.protein_name == BindingSiteModel.protein_name)
-   query = query.join(GeneModel, (GeneModel.symbol == BindingSiteModel.protein_name) & (GeneModel.chr == BindingSiteModel.chr))
-   #TODO uncomment this later, in testing dataset, there are no fitting datapoints  ,>= or > ?
-      # & (BindingSiteModel.end > GeneModel.start) & (BindingSiteModel.start < GeneModel.end))
-
-   #TODO why do we display gene symbol (its the same as protein name always, we are joining on that!)
-   query = query.add_columns(GeneModel.symbol, GeneModel.start, GeneModel.end, ProteinModel.uniprot_url)
-   query = query.filter(*filters)
-
-   #sorting
-   #TODO make another argument direction (desc, asc), instead of hardcoding every combination
-   if(sortby == 'score_asc'): query = query.order_by(BindingSiteModel.score.asc())
-   if(sortby == 'score_desc'): query = query.order_by(BindingSiteModel.score.desc())
-
-   if(sortby == 'protein_name_asc'): query = query.order_by(BindingSiteModel.protein_name.asc())
-   if(sortby == 'protein_name_desc'): query = query.order_by(BindingSiteModel.protein_name.desc())
-
-   if(sortby == 'chr_asc'): query = query.order_by(GeneModel.chr.asc())
-   if(sortby == 'chr_desc'): query = query.order_by(GeneModel.chr.desc())
-
-   if(sortby == 'start_asc'): query = query.order_by(BindingSiteModel.start.asc())
-   if(sortby == 'start_desc'): query = query.order_by(BindingSiteModel.start.desc())
-
-   if(sortby == 'end_asc'): query = query.order_by(BindingSiteModel.end.asc())
-   if(sortby == 'end_desc'): query = query.order_by(BindingSiteModel.end.desc())
-
-   if(sortby == 'strand_asc'): query = query.order_by(BindingSiteModel.strand.asc())
-   if(sortby == 'strand_desc'): query = query.order_by(BindingSiteModel.strand.desc())
-  
-   if(sortby == 'symbol_asc'): query = query.order_by(GeneModel.symbol.asc())
-   if(sortby == 'symbol_desc'): query = query.order_by(GeneModel.symbol.desc())
-
-   if(sortby == 'gene_start_asc'): query = query.order_by(GeneModel.start.asc())
-   if(sortby == 'gene_start_desc'): query = query.order_by(GeneModel.start.desc())
-
-   if(sortby == 'gene_end_asc'): query = query.order_by(GeneModel.end.asc())
-   if(sortby == 'gene_end_desc'): query = query.order_by(GeneModel.end.desc())
-
-   if(sortby == 'id_asc'): query = query.order_by(BindingSiteModel.id.asc())
-   if(sortby == 'id_desc'): query = query.order_by(BindingSiteModel.id.desc())
-
-
-
+   params = get_params_from_request(request)
+   query = get_query_from_params(params)
    # print(query)
+
+   #TODO duplicate 
+   protein = params['protein']
+   symbol = params['symbol']
+   gene_id = params['gene_id']
+   loc_min = params['loc_min']
+   loc_max = params['loc_max']
+   chromozom = params['chromozom']
+   area_min = params['area_min']
+   area_max = params['area_max']
+   score_min = params['score_min']
+   sortby = params['sortby']
+   page = params['page']
 
    pagination = query.paginate(page=page, per_page = 25)
    
@@ -214,7 +93,6 @@ def search():
       loc_max = ''
    if score_min == None:
       score_min = ''
-   # searchform.sort_by.data = sortby
 
    args_without_page = {key: value for key, value in request.args.items() if key != 'page'}
 
@@ -326,3 +204,113 @@ def search():
       score_min_default = score_min,
       gene_id_default = gene_id,
    )
+
+def get_params_from_request(request):
+   #get parameters from url
+
+   #TODO in progress non-null params
+   # params_to_watch = ['protein_name', 'chromozom', 'sort_by', 'page']
+
+   params = {}
+   #protein
+   params["protein"] = request.args.get('protein_name', type=str, default="")
+   params["symbol"] = request.args.get('symbol', type=str, default="")
+   params["gene_id"] = request.args.get('gene_id', type=str, default="")
+
+   #genomic location (genes start/end)
+   params["loc_min"] = request.args.get('loc_min', type=int, default="")
+   params["loc_max"] = request.args.get('loc_max', type=int, default="")
+   #chromozom
+   params["chromozom"] = request.args.get('chromozom', type=str, default="")
+   #gene area (binding site start/end ?)
+   params["area_min"] = request.args.get('area_min', type=int, default="")
+   params["area_max"] = request.args.get('area_max', type=int, default="")
+   #score ?
+   params["score_min"] = request.args.get('score_min', type=float, default="")
+   # score_max = request.args.get('score_max', type=float)
+
+   #control elements
+   params["page"] = request.args.get('page', type=int, default = 1)
+   params["sortby"] = request.args.get('sort_by', type=str, default='protein_name_desc')
+
+   return params
+
+def get_query_from_params(params):
+   protein = params['protein']
+   symbol = params['symbol']
+   gene_id = params['gene_id']
+   loc_min = params['loc_min']
+   loc_max = params['loc_max']
+   chromozom = params['chromozom']
+   area_min = params['area_min']
+   area_max = params['area_max']
+   score_min = params['score_min']
+   sortby = params['sortby']
+
+   #building the filters from parameters
+   filters = []
+   if(protein): filters.append(ProteinModel.protein_name == protein)
+   if(symbol): filters.append(GeneModel.symbol == symbol)
+   if(gene_id): filters.append(GeneModel.id == gene_id)
+   
+   if(loc_min): filters.append(GeneModel.start >= loc_min)
+   if(loc_max): filters.append(GeneModel.end <= loc_max)
+
+   #checks if not None and if not empty string
+   if(chromozom): filters.append(BindingSiteModel.chr == chromozom)
+   if(area_min): filters.append(BindingSiteModel.start >= area_min)
+   if(area_max): filters.append(BindingSiteModel.end <= area_max)
+   if(score_min): filters.append(BindingSiteModel.score >= score_min)
+   # if(score_max!=None): filters.append(BindingSiteModel.score <= score_max)
+
+   
+   #bulding the query 
+   #Legacy query - querying all models, not only binding site
+   #TODO order joins properly
+   # query = db.session.query(BindingSiteModel, ProteinModel.protein_name, GeneModel.symbol)
+   # query = query.join(ProteinModel, ProteinModel.protein_name == BindingSiteModel.protein_name)
+   # query = query.join(GeneModel, GeneModel.chr == BindingSiteModel.chr)
+   # query = query.filter(*filters)
+
+   query = BindingSiteModel.query.join(ProteinModel, ProteinModel.protein_name == BindingSiteModel.protein_name)
+   query = query.join(GeneModel, (GeneModel.symbol == BindingSiteModel.protein_name) & (GeneModel.chr == BindingSiteModel.chr))
+   #TODO uncomment this later, in testing dataset, there are no fitting datapoints  ,>= or > ?
+      # & (BindingSiteModel.end > GeneModel.start) & (BindingSiteModel.start < GeneModel.end))
+
+   #TODO why do we display gene symbol (its the same as protein name always, we are joining on that!)
+   query = query.add_columns(GeneModel.symbol, GeneModel.start, GeneModel.end, ProteinModel.uniprot_url)
+   query = query.filter(*filters)
+
+   #sorting
+   #TODO make another argument direction (desc, asc), instead of hardcoding every combination
+   if(sortby == 'score_asc'): query = query.order_by(BindingSiteModel.score.asc())
+   if(sortby == 'score_desc'): query = query.order_by(BindingSiteModel.score.desc())
+
+   if(sortby == 'protein_name_asc'): query = query.order_by(BindingSiteModel.protein_name.asc())
+   if(sortby == 'protein_name_desc'): query = query.order_by(BindingSiteModel.protein_name.desc())
+
+   if(sortby == 'chr_asc'): query = query.order_by(GeneModel.chr.asc())
+   if(sortby == 'chr_desc'): query = query.order_by(GeneModel.chr.desc())
+
+   if(sortby == 'start_asc'): query = query.order_by(BindingSiteModel.start.asc())
+   if(sortby == 'start_desc'): query = query.order_by(BindingSiteModel.start.desc())
+
+   if(sortby == 'end_asc'): query = query.order_by(BindingSiteModel.end.asc())
+   if(sortby == 'end_desc'): query = query.order_by(BindingSiteModel.end.desc())
+
+   if(sortby == 'strand_asc'): query = query.order_by(BindingSiteModel.strand.asc())
+   if(sortby == 'strand_desc'): query = query.order_by(BindingSiteModel.strand.desc())
+  
+   if(sortby == 'symbol_asc'): query = query.order_by(GeneModel.symbol.asc())
+   if(sortby == 'symbol_desc'): query = query.order_by(GeneModel.symbol.desc())
+
+   if(sortby == 'gene_start_asc'): query = query.order_by(GeneModel.start.asc())
+   if(sortby == 'gene_start_desc'): query = query.order_by(GeneModel.start.desc())
+
+   if(sortby == 'gene_end_asc'): query = query.order_by(GeneModel.end.asc())
+   if(sortby == 'gene_end_desc'): query = query.order_by(GeneModel.end.desc())
+
+   if(sortby == 'id_asc'): query = query.order_by(BindingSiteModel.id.asc())
+   if(sortby == 'id_desc'): query = query.order_by(BindingSiteModel.id.desc())
+
+   return query
