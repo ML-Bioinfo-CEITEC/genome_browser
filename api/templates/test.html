@@ -47,6 +47,11 @@
                 </form>
             </div>
             <div style="margin-left: 220px;">
+                {%for key in rows[0].keys()%}
+                    <a href="{{secondary_sort_urls[key]}}">{{key}}</a>
+                {%endfor%}
+            </div>
+            <div style="margin-left: 220px;">
                 {{table}}
             </div>
             <div style="margin-left: 220px;">

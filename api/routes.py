@@ -37,7 +37,7 @@ def download():
 @genomic.route('/search', methods=["GET","POST"])
 #TODO what if db is not running -> crashes
 #TODO verify attributed, server crashes if wrong arguments supplied, try testing it, wrong datatype etc...
-#TODO empty result - crashes
+#TODO empty result - crashes in multiple places
 #TODO add cache for back button etc?
 def search():
    #check for search form sumbission
@@ -69,6 +69,8 @@ def search():
    serialized = [{**log.BindingSiteModel.serialize(), "symbol":log[1], "gene_start":log[2], "gene_end":log[3], "Protein url":log[4]} for log in pagination.items]
 
    args_without_page = {key: value for key, value in request.args.items() if key != 'page'}
+   args_without_secondary_sort = {key: value for key, value in request.args.items() if key != 'sort_by_secondary'}
+
 
    table = MyTable(
       items=serialized,
@@ -76,6 +78,9 @@ def search():
       last_sort_type=sort_type_getter[params['sortby']],
       html_attrs={'style':'width:100%','border':'1px solid lightgrey'}
    )
+
+   #TODO secondary sorting refactoring, this serves just to demo the sort result
+   secondary_sort_urls = {column: url_for('genomic.search', sort_by_secondary=f"{column}_asc", **args_without_secondary_sort) for column in serialized[0].keys()}
 
    return render_template(
       'test.html', 
@@ -86,6 +91,7 @@ def search():
       prev_page_url = url_for('genomic.search', page=params['page']-1, **args_without_page),
       next_page_url = url_for('genomic.search', page=params['page']+1, **args_without_page),
       download_url = url_for('genomic.download', **dict(request.args.items())),
+      secondary_sort_urls = secondary_sort_urls,
       has_prev = pagination.has_prev,
       has_next = pagination.has_next,
       form = searchform,
@@ -127,7 +133,8 @@ def get_params_from_request(request):
 
    #control elements
    params["page"] = request.args.get('page', type=int, default = 1)
-   params["sortby"] = request.args.get('sort_by', type=str, default='protein_name_desc')
+   params["sortby"] = request.args.get('sort_by', type=str, default='id_asc')
+   params["sortby_secondary"] = request.args.get('sort_by_secondary', type=str, default='protein_name_desc')
 
    return params
 
@@ -142,6 +149,7 @@ def get_query_from_params(params):
    area_max = params['area_max']
    score_min = params['score_min']
    sortby = params['sortby']
+   sortby_secondary = params['sortby_secondary']
 
    #building the filters from parameters
    filters = []
@@ -180,6 +188,7 @@ def get_query_from_params(params):
 
    #sorting
    #TODO make another argument direction (desc, asc), instead of hardcoding every combination
+   #TODO i display only 3 decimals for score - if i sort by score primarily and secondarily by something else, the table looks weird, because the full score isnt displayed
    if(sortby == 'score_asc'): query = query.order_by(BindingSiteModel.score.asc())
    if(sortby == 'score_desc'): query = query.order_by(BindingSiteModel.score.desc())
 
@@ -209,5 +218,36 @@ def get_query_from_params(params):
 
    if(sortby == 'id_asc'): query = query.order_by(BindingSiteModel.id.asc())
    if(sortby == 'id_desc'): query = query.order_by(BindingSiteModel.id.desc())
+
+
+   if(sortby_secondary == 'score_asc'): query = query.order_by(BindingSiteModel.score.asc())
+   if(sortby_secondary == 'score_desc'): query = query.order_by(BindingSiteModel.score.desc())
+
+   if(sortby_secondary == 'protein_name_asc'): query = query.order_by(BindingSiteModel.protein_name.asc())
+   if(sortby_secondary == 'protein_name_desc'): query = query.order_by(BindingSiteModel.protein_name.desc())
+
+   if(sortby_secondary == 'chr_asc'): query = query.order_by(GeneModel.chr.asc())
+   if(sortby_secondary == 'chr_desc'): query = query.order_by(GeneModel.chr.desc())
+
+   if(sortby_secondary == 'start_asc'): query = query.order_by(BindingSiteModel.start.asc())
+   if(sortby_secondary == 'start_desc'): query = query.order_by(BindingSiteModel.start.desc())
+
+   if(sortby_secondary == 'end_asc'): query = query.order_by(BindingSiteModel.end.asc())
+   if(sortby_secondary == 'end_desc'): query = query.order_by(BindingSiteModel.end.desc())
+
+   if(sortby_secondary == 'strand_asc'): query = query.order_by(BindingSiteModel.strand.asc())
+   if(sortby_secondary == 'strand_desc'): query = query.order_by(BindingSiteModel.strand.desc())
+  
+   if(sortby_secondary == 'symbol_asc'): query = query.order_by(GeneModel.symbol.asc())
+   if(sortby_secondary == 'symbol_desc'): query = query.order_by(GeneModel.symbol.desc())
+
+   if(sortby_secondary == 'gene_start_asc'): query = query.order_by(GeneModel.start.asc())
+   if(sortby_secondary == 'gene_start_desc'): query = query.order_by(GeneModel.start.desc())
+
+   if(sortby_secondary == 'gene_end_asc'): query = query.order_by(GeneModel.end.asc())
+   if(sortby_secondary == 'gene_end_desc'): query = query.order_by(GeneModel.end.desc())
+
+   if(sortby_secondary == 'id_asc'): query = query.order_by(BindingSiteModel.id.asc())
+   if(sortby_secondary == 'id_desc'): query = query.order_by(BindingSiteModel.id.desc())
 
    return query

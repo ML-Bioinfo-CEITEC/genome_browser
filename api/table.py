@@ -20,7 +20,7 @@ class MyTable(Table):
     allow_sort = True
     id=Col("Id")
     protein_name = ExternalUrlCol(name="Protein name", url_attr='Protein url', attr='protein_name')
-    score = ScoreCol("Score", )
+    score = ScoreCol("Score")
     chr=Col("Chromozom")
     start=Col("Start")
     end=Col("End")
