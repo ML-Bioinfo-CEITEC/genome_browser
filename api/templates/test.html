@@ -46,14 +46,48 @@
                     <p>{{form.submit()}}</p>
                 </form>
             </div>
-            <div style="margin-left: 220px;">
+            <!-- <div style="margin-left: 220px;">
                 {%for key in rows[0].keys()%}
-                    <a href="{{secondary_sort_urls[key]}}">{{key}}</a>
+                    <a href="{{secondary_sort_asc_urls[key]}}">{{key}}</a>
                 {%endfor%}
-            </div>
-            <div style="margin-left: 220px;">
+            </div> -->
+            <!-- <div style="margin-left: 220px;">
+                <h2>Flask-table table</h2>
                 {{table}}
+            </div> -->
+
+
+            <div style="margin-left: 220px;">
+                <!-- <h2>Custom table</h2> -->
+                <table style="width:100%; border:1px solid lightgrey; border-collapse: collapse;">
+                    <tbody>
+                        <tr style="border: 1px solid lightgrey;">
+                            {% for key, value in rows[0].items()%}
+                                {% if key != 'Protein url'%}
+                                <td>{{key}} <a href="{{primary_sort_asc_urls[key]}}">↥</a> <a href="{{primary_sort_desc_urls[key]}}">↧</a> <a href="{{secondary_sort_asc_urls[key]}}">↟</a> <a href="{{secondary_sort_desc_urls[key]}}">↡</a></td>
+                                {%endif%}
+                            {% endfor %}
+                        </tr>    
+                        {% for row in rows%}
+                        <tr style="border: 1px solid lightgrey;">
+                            {% for key, value in row.items()%}
+                                <!-- TODO hardcoded protein_name and Protein url names - parametrize? -->
+                                {% if (key == "protein_name" or key=='symbol')%}
+                                <td><a href="{{row['Protein url']}}">{{value}}</a></td>
+                                {%elif key == 'score'%}
+                                <td>{{value|round(3, 'floor')}}</td>
+                                {% elif key!= 'Protein url'%}
+                                <td>{{value}}</td>
+                                {%endif%}
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
+
+
+
             <div style="margin-left: 220px;">
             {%if has_prev %}
             <a href="{{ prev_page_url }}">PREVIOUS</a>
