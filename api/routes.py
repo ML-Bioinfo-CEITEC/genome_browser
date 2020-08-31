@@ -6,6 +6,7 @@ from copy import deepcopy
 from flask_table import Table, Col, LinkCol
 from flask_table.html import element
 import csv
+from table import MyTable, sort_type_getter
 
 genomic = Blueprint('genomic', __name__)
 
@@ -37,7 +38,6 @@ def download():
 #TODO what if db is not running -> crashes
 #TODO verify attributed, server crashes if wrong arguments supplied, try testing it, wrong datatype etc...
 #TODO empty result - crashes
-#TODO convert to POST request (has body) on searching, so params don't clutter url bar
 #TODO add cache for back button etc?
 def search():
    #check for search form sumbission
@@ -50,7 +50,7 @@ def search():
          #TODO resolve the token in url some other way, why is it in there in the first place?
          if value and fieldname!='submit' and fieldname!='csrf_token':
             params[fieldname] = value
-            print(fieldname, value)
+            # print(fieldname, value)
       return redirect(
          url_for(
             'genomic.search', 
@@ -63,146 +63,42 @@ def search():
    query = get_query_from_params(params)
    # print(query)
 
-   #TODO duplicate 
-   protein = params['protein']
-   symbol = params['symbol']
-   gene_id = params['gene_id']
-   loc_min = params['loc_min']
-   loc_max = params['loc_max']
-   chromozom = params['chromozom']
-   area_min = params['area_min']
-   area_max = params['area_max']
-   score_min = params['score_min']
-   sortby = params['sortby']
-   page = params['page']
-
-   pagination = query.paginate(page=page, per_page = 25)
+   pagination = query.paginate(page=params['page'], per_page = 25)
    
    #TODO remove gene start and end, it's there just for our check
    serialized = [{**log.BindingSiteModel.serialize(), "symbol":log[1], "gene_start":log[2], "gene_end":log[3], "Protein url":log[4]} for log in pagination.items]
 
-   #TODO hacking is my life
-   #resolve all defaults this way and don't pass to html?
-   if area_min == None:
-      area_min = ''
-   if area_max == None:
-      area_max = ''
-   if loc_min == None:
-      loc_min = ''
-   if loc_max == None:
-      loc_max = ''
-   if score_min == None:
-      score_min = ''
-
    args_without_page = {key: value for key, value in request.args.items() if key != 'page'}
 
-
-
-   #TABLECODE#################
-   #TODO extract elswhere
-   class ExternalUrlCol(Col):
-      def __init__(self, name, url_attr, **kwargs):
-         self.url_attr = url_attr
-         super(ExternalUrlCol, self).__init__(name, **kwargs)
-
-      def td_contents(self, item, attr_list):
-         text = self.from_attr_list(item, attr_list)
-         url = self.from_attr_list(item, [self.url_attr])
-         return element('a', {'href': url}, content=text)
-
-   class ScoreCol(Col):
-      def td_contents(self, item, attr_list):
-         return element('div', content=round(self.from_attr_list(item, 'score'), 3))
-
-   class MyTable(Table):
-      allow_sort = True
-      id=Col("Id")
-      protein_name = ExternalUrlCol(name="Protein name", url_attr='Protein url', attr='protein_name')
-      score = ScoreCol("Score", )
-      chr=Col("Chromozom")
-      start=Col("Start")
-      end=Col("End")
-      strand=Col("Strand")
-      note=Col("Note")
-      symbol=ExternalUrlCol(name="Gene symbol", url_attr='Protein url', attr='symbol')
-      gene_start=Col("Gene start")
-      gene_end=Col("Gene end")
-
-      def __init__(self, items, request, last_sort_type, html_attrs):
-         self.last_sort_type = last_sort_type
-         Table.__init__(self, items=items, html_attrs = html_attrs)
-
-      def sort_url(self, col_key, reverse=False):
-         args_without_sortby = {key: value for key, value in request.args.items() if key != 'sort_by'}
-
-
-         if(self.last_sort_type == 'asc'):
-            suffix = 'desc'
-         if(self.last_sort_type == 'desc'):
-            suffix = 'asc'
-
-         return url_for('genomic.search', **args_without_sortby, sort_by=col_key+'_'+suffix)
-
-
-   
-   sort_type_getter = {
-      'score_desc': 'desc',
-      'protein_name_desc': 'desc',
-      'chr_desc':'desc',
-      'start_desc':'desc',
-      'end_desc':'desc',
-      'strand_desc':'desc',
-      'symbol_desc':'desc',
-      'gene_start_desc':'desc',
-      'gene_end_desc':'desc',
-      'id_desc':'desc',
-
-      'score_asc':'asc',
-      'protein_name_asc':'asc',
-      'chr_asc':'asc',
-      'start_asc':'asc',
-      'end_asc':'asc',
-      'strand_asc':'asc',
-      'symbol_asc':'asc',
-      'gene_start_asc':'asc',
-      'gene_end_asc':'asc',
-      'id_asc':'asc'
-   }
-
    table = MyTable(
-      # items=[{'protein_name': log['protein_name'], 'score':log['score'], 'chr':log['chr']} for log in serialized],
       items=serialized,
       request = request,
-      last_sort_type=sort_type_getter[sortby],
+      last_sort_type=sort_type_getter[params['sortby']],
       html_attrs={'style':'width:100%','border':'1px solid lightgrey'}
    )
-   #TODO check the validity of sortby existing in dict
-   # table.set_last_sort(sort_type_getter[sortby])
-   #####################
 
    return render_template(
       'test.html', 
       table = table,
       rows=serialized, 
-      page = page, 
+      page = params['page'], 
       pages = pagination.pages,
-      #TODO add other parameters
-      prev_page_url = url_for('genomic.search', page=page-1, **args_without_page),
-      next_page_url = url_for('genomic.search', page=page+1, **args_without_page),
+      prev_page_url = url_for('genomic.search', page=params['page']-1, **args_without_page),
+      next_page_url = url_for('genomic.search', page=params['page']+1, **args_without_page),
       download_url = url_for('genomic.download', **dict(request.args.items())),
       has_prev = pagination.has_prev,
       has_next = pagination.has_next,
       form = searchform,
-      chromozom_default = chromozom,
-      protein_default = protein,
-      symbol_default = symbol,
-      sort_by_default = sortby,
-      area_min_default = area_min,
-      area_max_default = area_max,
-      loc_min_default = loc_min,
-      loc_max_default = loc_max,
-      score_min_default = score_min,
-      gene_id_default = gene_id,
+      chromozom_default = params['chromozom'],
+      protein_default = params['protein'],
+      symbol_default = params['symbol'],
+      sort_by_default = params['sortby'],
+      area_min_default = params['area_min'],
+      area_max_default = params['area_max'],
+      loc_min_default = params['loc_min'],
+      loc_max_default = params['loc_max'],
+      score_min_default = params['score_min'],
+      gene_id_default = params['gene_id'],
    )
 
 def get_params_from_request(request):
@@ -272,6 +168,7 @@ def get_query_from_params(params):
    # query = query.join(GeneModel, GeneModel.chr == BindingSiteModel.chr)
    # query = query.filter(*filters)
 
+   #TODO sorting by id doesnt give me all the ids (with no filters) - are we filtering wrong?
    query = BindingSiteModel.query.join(ProteinModel, ProteinModel.protein_name == BindingSiteModel.protein_name)
    query = query.join(GeneModel, (GeneModel.symbol == BindingSiteModel.protein_name) & (GeneModel.chr == BindingSiteModel.chr))
    #TODO uncomment this later, in testing dataset, there are no fitting datapoints  ,>= or > ?
