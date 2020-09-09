@@ -61,44 +61,51 @@
                 <!-- <h2>Custom table</h2> -->
                 <table style="width:100%; border:1px solid lightgrey; border-collapse: collapse;">
                     <tbody>
-                        <tr style="border: 1px solid lightgrey;">
+                        <tr style="border: 1px solid black;">
                             {% for key, value in rows[0].items()%}
                                 {% if key != 'Protein url'%}
                                 <td>{{key}} <a href="{{primary_sort_asc_urls[key]}}">↥</a> <a href="{{primary_sort_desc_urls[key]}}">↧</a> <a href="{{secondary_sort_asc_urls[key]}}">↟</a> <a href="{{secondary_sort_desc_urls[key]}}">↡</a></td>
                                 {%endif%}
                             {% endfor %}
                         </tr>    
-                        {% for row in rows%}
-                        <tr style="border: 1px solid lightgrey;">
-                            {% for key, value in row.items()%}
-                                <!-- TODO hardcoded protein_name and Protein url names - parametrize? -->
-                                {% if (key == "protein_name" or key=='symbol')%}
-                                <td><a href="{{row['Protein url']}}">{{value}}</a></td>
-                                {%elif key == 'score'%}
-                                <td>{{value|round(3, 'floor')}}</td>
-                                {% elif key!= 'Protein url'%}
-                                <td>{{value}}</td>
-                                {%endif%}
+                        {% if rows[0]['id'] %}
+                            {% for row in rows%}
+                            <tr style="border: 1px solid lightgrey;">
+                                {% for key, value in row.items()%}
+                                    <!-- TODO hardcoded protein_name and Protein url names - parametrize? -->
+                                    {% if (key == "protein_name" or key=='symbol') and value%}
+                                    <td><a href="{{row['Protein url']}}">{{value}}</a></td>
+                                    {%elif key == 'score' and value%}
+                                    <td>{{value|round(3, 'floor')}}</td>
+                                    {% elif key!= 'Protein url'%}
+                                    <td>{{value}}</td>
+                                    {%endif%}
+                                {% endfor %}
+                            </tr>
                             {% endfor %}
-                        </tr>
-                        {% endfor %}
+                        {% endif %}
                     </tbody>
                 </table>
             </div>
 
 
 
-            <div style="margin-left: 220px;">
+        <div style="margin-left: 220px;">
             {%if has_prev %}
             <a href="{{ prev_page_url }}">PREVIOUS</a>
             {% endif %}
             {%if has_next %}
             <a href="{{ next_page_url }}">NEXT</a>
             {% endif %}
-            <div>Page {{page}} / {{pages}}</div>
-            <a href="{{download_url}}">DOWNLOAD</a>
+            {% if rows[0]['id'] %}
+                <div>Page {{page}} / {{pages}}</div>
+                <a href="{{download_url}}">DOWNLOAD</a>
+                </div>
+            {% else %}
+            <div style="margin-top: 20px; font-weight: bold">
+                <div>Empty search result</div>
             </div>
-            
+            {% endif %}
         </div>
         
     </body>

@@ -17,6 +17,7 @@ class ScoreCol(Col):
         return element('div', content=round(self.from_attr_list(item, 'score'), 3))
 
 class MyTable(Table):
+    # ToDo: allow_sort - unused variable?
     allow_sort = True
     id=Col("Id")
     protein_name = ExternalUrlCol(name="Protein name", url_attr='Protein url', attr='protein_name')
