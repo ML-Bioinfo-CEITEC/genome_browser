@@ -16,8 +16,6 @@ def download():
    
    params = get_params_from_request(request)
    query = get_query_from_params(params)
-   #TODO doesnt go here?
-   print(query)
    result = query.all()
    
    results = [{**log.BindingSiteModel.serialize(), "symbol":log[1], "Protein url":log[4]} for log in result]

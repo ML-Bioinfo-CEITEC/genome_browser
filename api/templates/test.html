@@ -50,9 +50,7 @@
                     </div>
                 </form>
                 {% if rows[0]['id'] %}
-                    <form action="{{download_url}}">
-                        <button type="submit">DOWNLOAD</button>
-                    </form>
+                <a href="{{download_url}}">DOWNLOAD</a>
                 {% endif %}
             </div>
 
@@ -99,7 +97,6 @@
             {% endif %}
             {% if rows[0]['id'] %}
                 <div>Page {{page}} / {{pages}}</div>
-                <!-- <a href="{{download_url}}">DOWNLOAD</a> -->
                 </div>
             {% else %}
             <div style="margin-top: 20px; font-weight: bold">
