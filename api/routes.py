@@ -13,12 +13,14 @@ genomic = Blueprint('genomic', __name__)
 @genomic.route('/download')
 def download():
    #TODO what if the data doesnt fit in RAM?
-
+   
    params = get_params_from_request(request)
    query = get_query_from_params(params)
+   #TODO doesnt go here?
+   print(query)
    result = query.all()
    
-   results = [{**log.BindingSiteModel.serialize(), "symbol":log[1], "gene_start":log[2], "gene_end":log[3], "Protein url":log[4]} for log in result]
+   results = [{**log.BindingSiteModel.serialize(), "symbol":log[1], "Protein url":log[4]} for log in result]
    if(len(results) == 0):
       return "No results"
 
@@ -29,7 +31,6 @@ def download():
       dict_writer = csv.DictWriter(output_file, keys)
       dict_writer.writeheader()
       dict_writer.writerows(results)
-
    return send_file('genomic_download.csv', mimetype='text/csv',
                      attachment_filename='genomic_dowload.csv',
                      as_attachment=True)
@@ -63,23 +64,20 @@ def search():
    query = get_query_from_params(params)
    # print(query)
 
-   pagination = query.paginate(page=params['page'], per_page = 25)
+   pagination = query.paginate(page=params['page'], per_page = 23)
    
    #TODO remove gene start and end, it's there just for our check
-   serialized = [{**log.BindingSiteModel.serialize(), "symbol":log[1], "gene_start":log[2], "gene_end":log[3], "Protein url":log[4]} for log in pagination.items]
+   serialized = [{**log.BindingSiteModel.serialize(), "symbol":log[1], "Protein url":log[4]} for log in pagination.items]
+
+   show_gene_range = False
+   if(show_gene_range):
+      serialized = [{**dic, "gene_start":log[2], "gene_end":log[3]} for log, dic in zip(pagination.items, serialized)]
 
    #TODO refactor args_without_*, ugly
    args_without_page = {key: value for key, value in request.args.items() if key != 'page'}
    args_without_secondary_sort = {key: value for key, value in request.args.items() if key != 'sort_by_secondary'}
    args_without_primary_sort = {key: value for key, value in request.args.items() if key != 'sort_by'}
 
-
-   table = MyTable(
-      items=serialized,
-      request = request,
-      last_sort_type=sort_type_getter[params['sortby']],
-      html_attrs={'style':'width:100%','border':'1px solid lightgrey'}
-   )
 
    if serialized:
       primary_sort_asc_urls = {column: url_for('genomic.search', sort_by=f"{column}_asc", **args_without_primary_sort) for column in serialized[0].keys()}
@@ -97,7 +95,7 @@ def search():
 
    return render_template(
       'test.html',
-      table = table,
+      # table = table,
       rows=serialized, 
       page = params['page'], 
       pages = pagination.pages,
@@ -149,6 +147,7 @@ def get_params_from_request(request):
 
    #control elements
    params["page"] = request.args.get('page', type=int, default = 1)
+   #TODO sorting by secondary first does nothing (sorting by id is the hidden default)
    params["sortby"] = request.args.get('sort_by', type=str, default='id_asc')
    params["sortby_secondary"] = request.args.get('sort_by_secondary', type=str, default='protein_name_desc')
 

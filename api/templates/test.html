@@ -1,90 +1,90 @@
 <html>
     <head>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
         <title>Gene search</title>
     </head>
     <body>
-        <div style="width: 100%">
-            <div style="width:200px; float: left;">
+        <div style="width: 100% ">
+            <div style="width:200px; float: left; padding-left:10px; padding-top:20px; ">
                 <form method="POST" action="" nonvalidate>
                     {{ form.hidden_tag() }}
                     <p>
                         {{ form.chromozom.label }}<br>
-                        {{ form.chromozom(size=16, value=chromozom_default) }}
+                        {{ form.chromozom(size=16, value=chromozom_default, class_='form-control form-control-sm') }}
                     </p>
                     <p>
                         {{ form.protein_name.label }}<br>
-                        {{ form.protein_name(size=16, value=protein_default) }}
+                        {{ form.protein_name(size=16, value=protein_default, class_='form-control form-control-sm') }}
                     </p>
                     <p>
                         {{ form.gene_id.label }}<br>
-                        {{ form.gene_id(size=16, value=gene_id_default) }}
+                        {{ form.gene_id(size=16, value=gene_id_default, class_='form-control form-control-sm') }}
                     </p>
                     <p>
                         {{ form.symbol.label }}<br>
-                        {{ form.symbol(size=16, value=symbol_default) }}
+                        {{ form.symbol(size=16, value=symbol_default, class_='form-control form-control-sm') }}
                     </p>
                     <p>
                         {{ form.area_min.label }}<br>
-                        {{ form.area_min(size=16, value=area_min_default) }}
+                        {{ form.area_min(size=16, value=area_min_default, class_='form-control form-control-sm') }}
                     </p>
                     <p>
                         {{ form.area_max.label }}<br>
-                        {{ form.area_max(size=16, value=area_max_default) }}
+                        {{ form.area_max(size=16, value=area_max_default, class_='form-control form-control-sm') }}
                     </p>
                     <p>
                         {{ form.loc_min.label }}<br>
-                        {{ form.loc_min(size=16, value=loc_min_default) }}
+                        {{ form.loc_min(size=16, value=loc_min_default, class_='form-control form-control-sm') }}
                     </p>
                     <p>
                         {{ form.loc_max.label }}<br>
-                        {{ form.loc_max(size=16, value=loc_max_default) }}
+                        {{ form.loc_max(size=16, value=loc_max_default, class_='form-control form-control-sm') }}
                     </p>
                     <p>
                         {{ form.score_min.label }}<br>
-                        {{ form.score_min(size=16, value=score_min_default) }}
+                        {{ form.score_min(size=16, value=score_min_default, class_='form-control form-control-sm') }}
                     </p>
-                    <p>{{form.submit()}}</p>
+                    <div>
+                        <p>{{form.submit()}}</p>
+                        
+                    </div>
                 </form>
+                {% if rows[0]['id'] %}
+                    <form action="{{download_url}}">
+                        <button type="submit">DOWNLOAD</button>
+                    </form>
+                {% endif %}
             </div>
-            <!-- <div style="margin-left: 220px;">
-                {%for key in rows[0].keys()%}
-                    <a href="{{secondary_sort_asc_urls[key]}}">{{key}}</a>
-                {%endfor%}
-            </div> -->
-            <!-- <div style="margin-left: 220px;">
-                <h2>Flask-table table</h2>
-                {{table}}
-            </div> -->
-
 
             <div style="margin-left: 220px;">
-                <!-- <h2>Custom table</h2> -->
-                <table style="width:100%; border:1px solid lightgrey; border-collapse: collapse;">
-                    <tbody>
-                        <tr style="border: 1px solid black;">
+                <table class='table table-striped table-bordered table-sm'>
+                    {% if rows[0]['id'] %}
+                    <thead class='thead-dark'>
+                        <tr>
                             {% for key, value in rows[0].items()%}
                                 {% if key != 'Protein url'%}
-                                <td>{{key}} <a href="{{primary_sort_asc_urls[key]}}">↥</a> <a href="{{primary_sort_desc_urls[key]}}">↧</a> <a href="{{secondary_sort_asc_urls[key]}}">↟</a> <a href="{{secondary_sort_desc_urls[key]}}">↡</a></td>
+                                <th>{{key}} <a href="{{primary_sort_asc_urls[key]}}">↥</a> <a href="{{primary_sort_desc_urls[key]}}">↧</a> <a href="{{secondary_sort_asc_urls[key]}}">↟</a> <a href="{{secondary_sort_desc_urls[key]}}">↡</a></th>
                                 {%endif%}
                             {% endfor %}
-                        </tr>    
-                        {% if rows[0]['id'] %}
-                            {% for row in rows%}
-                            <tr style="border: 1px solid lightgrey;">
-                                {% for key, value in row.items()%}
-                                    <!-- TODO hardcoded protein_name and Protein url names - parametrize? -->
-                                    {% if (key == "protein_name" or key=='symbol') and value%}
-                                    <td><a href="{{row['Protein url']}}">{{value}}</a></td>
-                                    {%elif key == 'score' and value%}
-                                    <td>{{value|round(3, 'floor')}}</td>
-                                    {% elif key!= 'Protein url'%}
-                                    <td>{{value}}</td>
-                                    {%endif%}
-                                {% endfor %}
-                            </tr>
+                        </tr>  
+                    </thead> 
+                    <tbody>
+                        {% for row in rows%}
+                        <tr>
+                            {% for key, value in row.items()%}
+                                <!-- TODO hardcoded protein_name and Protein url names - parametrize? -->
+                                {% if (key == "protein_name" or key=='symbol') and value%}
+                                <td><a href="{{row['Protein url']}}">{{value}}</a></td>
+                                {%elif key == 'score' and value%}
+                                <td>{{value|round(3, 'floor')}}</td>
+                                {% elif key!= 'Protein url'%}
+                                <td>{{value}}</td>
+                                {%endif%}
                             {% endfor %}
-                        {% endif %}
+                        </tr>
+                        {% endfor %}
                     </tbody>
+                    {% endif %}
                 </table>
             </div>
 
@@ -99,7 +99,7 @@
             {% endif %}
             {% if rows[0]['id'] %}
                 <div>Page {{page}} / {{pages}}</div>
-                <a href="{{download_url}}">DOWNLOAD</a>
+                <!-- <a href="{{download_url}}">DOWNLOAD</a> -->
                 </div>
             {% else %}
             <div style="margin-top: 20px; font-weight: bold">
