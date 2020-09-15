@@ -60,6 +60,34 @@ class Prejoin(Base):
     gene_start = Column(Integer, index=True)
     gene_end = Column(Integer, index=True)
 
+    def __init__(self,
+        bs_id,
+        protein_name,
+        chr,
+        bs_start,
+        bs_end,
+        strand,
+        score,
+        note,
+        gene_id,
+        symbol,
+        gene_start,
+        gene_end):
+
+        self.bs_id = bs_id,
+        self.protein_name = protein_name,
+        self.chr = chr,
+        self.bs_start = bs_start,
+        self.bs_end = bs_end,
+        self.strand = strand,
+        self.score = score,
+        self.note = note,
+        self.gene_id = gene_id,
+        self.symbol = symbol,
+        self.gene_start = gene_start,
+        self.gene_end = gene_end
+        
+
 # Indexes for in-ram computing of the join
 # Index('multicolumn_binding_sites', BindingSite.chr, BindingSite.strand, BindingSite.start, BindingSite.end)
 # Index('multicolumn_genes', Gene.chr, Gene.strand, Gene.start, Gene.end)
