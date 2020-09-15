@@ -55,6 +55,10 @@ def import_to_prejoin():
         session.add(row)
     session.commit()
 
+def analyze():
+    with engine.connect() as con:
+        con.execute('ANALYZE;')
+
 
 
 
