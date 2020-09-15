@@ -1,4 +1,4 @@
-from flask import jsonify, request, Blueprint, render_template, url_for, redirect, make_response, send_file
+from flask import jsonify, request, Blueprint, render_template, url_for, redirect, make_response, send_file, Response
 from models import ProteinModel, BindingSiteModel, GeneModel, PrejoinModel
 from db.database import db
 from forms import SearchForm
@@ -8,31 +8,41 @@ from flask_table.html import element
 import csv
 from table import MyTable, sort_type_getter
 from sqlalchemy.orm import aliased
+import math
 
 genomic = Blueprint('genomic', __name__)
 
-#TODO enpoint doesnt trigger sometimes, send_file is caching probably, test it
 @genomic.route('/download')
 def download():
    #TODO what if the data doesnt fit in RAM?
+   print('trigger')
    params = get_params_from_request(request)
    query = get_query_from_params(params)
    result = query.all()
-   
+
    results = [{**log.PrejoinModel.serialize(), "Protein url":log[1], "Symbol url":log[2],} for log in result]
    if(len(results) == 0):
       return "No results"
 
-   #TODO skip undesired keys
-   keys = results[0].keys()
    #TODO delete csv afterwards?
+   keys = results[0].keys()
    with open('genomic_download.csv', 'w', newline='') as output_file:
       dict_writer = csv.DictWriter(output_file, keys)
       dict_writer.writeheader()
       dict_writer.writerows(results)
-   return send_file('genomic_download.csv', mimetype='text/csv',
+   #TODO add header for NOT CACHING (Browser caches the result!)
+
+
+   send = send_file('genomic_download.csv', mimetype='text/csv',
                      attachment_filename='genomic_dowload.csv',
-                     as_attachment=True, cache_timeout=0.000001) #, cache_timeout=0
+                     as_attachment=True) 
+   r = make_response(send)
+   #TODO chaching is OK? The problem was in pagination
+   r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, public, max-age=0"
+   r.headers["Pragma"] = "no-cache"
+   r.headers["Expires"] = "0"
+   return r
+   
 
 @genomic.route('/search', methods=["GET","POST"])
 #TODO what if db is not running -> crashes
@@ -63,8 +73,22 @@ def search():
    # print(query)
 
    #TODO dynamic results to fit the page? solve in css
-   pagination = query.paginate(page=params['page'], per_page = 20)
-   serialized=[{**log.PrejoinModel.serialize(), "Protein url":log[1], "Symbol url":log[2]} for log in pagination.items]
+
+   #TODO pagination orders differently than normal sql - this is the source of order incosistency in download and in displayed table
+   #This is our own paginate implementation
+   all_results = query.all()
+   page = params['page']
+   pagination = all_results[20*(page - 1):20*page]
+   serialized=[{**log.PrejoinModel.serialize(), "Protein url":log[1], "Symbol url":log[2]} for log in pagination]
+   total_pages = int(math.ceil(len(all_results)/20))
+   has_prev = page > 1
+   has_next = page < total_pages
+
+   # pagination = query.paginate(page=params['page'], per_page = 20)
+   # serialized=[{**log.PrejoinModel.serialize(), "Protein url":log[1], "Symbol url":log[2]} for log in pagination.items]
+   # total_pages = pagination.pages
+   # has_prev = pagination.has_prev
+   # has_next = pagination.has_next
 
    #TODO refactor args_without_*, ugly
    args_without_page = {key: value for key, value in request.args.items() if key != 'page'}
@@ -92,7 +116,7 @@ def search():
       # table = table,
       rows=serialized, 
       page = params['page'], 
-      pages = pagination.pages,
+      pages = total_pages,
       prev_page_url = url_for('genomic.search', page=params['page']-1, **args_without_page),
       next_page_url = url_for('genomic.search', page=params['page']+1, **args_without_page),
       download_url = url_for('genomic.download', **dict(request.args.items())),
@@ -100,8 +124,8 @@ def search():
       primary_sort_desc_urls = primary_sort_desc_urls,
       secondary_sort_asc_urls = secondary_sort_asc_urls,
       secondary_sort_desc_urls = secondary_sort_desc_urls,
-      has_prev = pagination.has_prev,
-      has_next = pagination.has_next,
+      has_prev = has_prev,
+      has_next = has_next,
       form = searchform,
       chromozom_default = params['chromozom'],
       protein_default = params['protein'],
@@ -142,8 +166,8 @@ def get_params_from_request(request):
    #control elements
    params["page"] = request.args.get('page', type=int, default = 1)
    #TODO sorting by secondary first does nothing (sorting by id is the hidden default)
-   params["sortby"] = request.args.get('sort_by', type=str, default='id_asc')
-   params["sortby_secondary"] = request.args.get('sort_by_secondary', type=str, default='protein_name_desc')
+   params["sortby"] = request.args.get('sort_by', type=str, default='id_desc')
+   params["sortby_secondary"] = request.args.get('sort_by_secondary', type=str, default=None)
 
    return params
 
@@ -176,7 +200,6 @@ def get_query_from_params(params):
    if(score_min): filters.append(PrejoinModel.score >= score_min)
    # if(score_max!=None): filters.append(BindingSiteModel.score <= score_max)
 
-   
    #ON-LINE QUERY
    #TODO sorting by id doesnt give me all the ids (with no filters) - are we filtering wrong?
    # query = BindingSiteModel.query.join(ProteinModel, ProteinModel.protein_name == BindingSiteModel.protein_name)
@@ -234,38 +257,38 @@ def get_query_from_params(params):
    if(sortby == 'id_asc'): query = query.order_by(PrejoinModel.bs_id.asc())
    if(sortby == 'id_desc'): query = query.order_by(PrejoinModel.bs_id.desc())
 
+   if(sortby_secondary):
+      if(sortby_secondary == 'score_asc'): query = query.order_by(PrejoinModel.score.asc())
+      if(sortby_secondary == 'score_desc'): query = query.order_by(PrejoinModel.score.desc())
 
-   if(sortby_secondary == 'score_asc'): query = query.order_by(PrejoinModel.score.asc())
-   if(sortby_secondary == 'score_desc'): query = query.order_by(PrejoinModel.score.desc())
+      if(sortby_secondary == 'protein_name_asc'): query = query.order_by(PrejoinModel.protein_name.asc())
+      if(sortby_secondary == 'protein_name_desc'): query = query.order_by(PrejoinModel.protein_name.desc())
 
-   if(sortby_secondary == 'protein_name_asc'): query = query.order_by(PrejoinModel.protein_name.asc())
-   if(sortby_secondary == 'protein_name_desc'): query = query.order_by(PrejoinModel.protein_name.desc())
+      # if(sortby_secondary == 'protein_name_asc'): query = query.order_by(BindingSiteModel.protein_name.asc())
+      # if(sortby_secondary == 'protein_name_desc'): query = query.order_by(BindingSiteModel.protein_name.desc())
 
-   # if(sortby_secondary == 'protein_name_asc'): query = query.order_by(BindingSiteModel.protein_name.asc())
-   # if(sortby_secondary == 'protein_name_desc'): query = query.order_by(BindingSiteModel.protein_name.desc())
+      if(sortby_secondary == 'chr_asc'): query = query.order_by(PrejoinModel.chr.asc())
+      if(sortby_secondary == 'chr_desc'): query = query.order_by(PrejoinModel.chr.desc())
 
-   if(sortby_secondary == 'chr_asc'): query = query.order_by(PrejoinModel.chr.asc())
-   if(sortby_secondary == 'chr_desc'): query = query.order_by(PrejoinModel.chr.desc())
+      if(sortby_secondary == 'start_asc'): query = query.order_by(PrejoinModel.bs_start.asc())
+      if(sortby_secondary == 'start_desc'): query = query.order_by(PrejoinModel.bs_start.desc())
 
-   if(sortby_secondary == 'start_asc'): query = query.order_by(PrejoinModel.bs_start.asc())
-   if(sortby_secondary == 'start_desc'): query = query.order_by(PrejoinModel.bs_start.desc())
+      if(sortby_secondary == 'end_asc'): query = query.order_by(PrejoinModel.bs_end.asc())
+      if(sortby_secondary == 'end_desc'): query = query.order_by(PrejoinModel.bs_end.desc())
 
-   if(sortby_secondary == 'end_asc'): query = query.order_by(PrejoinModel.bs_end.asc())
-   if(sortby_secondary == 'end_desc'): query = query.order_by(PrejoinModel.bs_end.desc())
+      if(sortby_secondary == 'strand_asc'): query = query.order_by(PrejoinModel.strand.asc())
+      if(sortby_secondary == 'strand_desc'): query = query.order_by(PrejoinModel.strand.desc())
+   
+      if(sortby_secondary == 'symbol_asc'): query = query.order_by(PrejoinModel.symbol.asc())
+      if(sortby_secondary == 'symbol_desc'): query = query.order_by(PrejoinModel.symbol.desc())
 
-   if(sortby_secondary == 'strand_asc'): query = query.order_by(PrejoinModel.strand.asc())
-   if(sortby_secondary == 'strand_desc'): query = query.order_by(PrejoinModel.strand.desc())
-  
-   if(sortby_secondary == 'symbol_asc'): query = query.order_by(PrejoinModel.symbol.asc())
-   if(sortby_secondary == 'symbol_desc'): query = query.order_by(PrejoinModel.symbol.desc())
+      if(sortby_secondary == 'gene_start_asc'): query = query.order_by(PrejoinModel.gene_start.asc())
+      if(sortby_secondary == 'gene_start_desc'): query = query.order_by(PrejoinModel.gene_start.desc())
 
-   if(sortby_secondary == 'gene_start_asc'): query = query.order_by(PrejoinModel.gene_start.asc())
-   if(sortby_secondary == 'gene_start_desc'): query = query.order_by(PrejoinModel.gene_start.desc())
+      if(sortby_secondary == 'gene_end_asc'): query = query.order_by(PrejoinModel.gene_end.asc())
+      if(sortby_secondary == 'gene_end_desc'): query = query.order_by(PrejoinModel.gene_end.desc())
 
-   if(sortby_secondary == 'gene_end_asc'): query = query.order_by(PrejoinModel.gene_end.asc())
-   if(sortby_secondary == 'gene_end_desc'): query = query.order_by(PrejoinModel.gene_end.desc())
-
-   if(sortby_secondary == 'id_asc'): query = query.order_by(PrejoinModel.bs_id.asc())
-   if(sortby_secondary == 'id_desc'): query = query.order_by(PrejoinModel.bs_id.desc())
+      if(sortby_secondary == 'id_asc'): query = query.order_by(PrejoinModel.bs_id.asc())
+      if(sortby_secondary == 'id_desc'): query = query.order_by(PrejoinModel.bs_id.desc())
 
    return query
