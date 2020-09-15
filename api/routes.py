@@ -1,5 +1,5 @@
 from flask import jsonify, request, Blueprint, render_template, url_for, redirect, make_response, send_file
-from models import ProteinModel, BindingSiteModel, GeneModel
+from models import ProteinModel, BindingSiteModel, GeneModel, PrejoinModel
 from db.database import db
 from forms import SearchForm
 from copy import deepcopy
@@ -10,15 +10,15 @@ from table import MyTable, sort_type_getter
 
 genomic = Blueprint('genomic', __name__)
 
+#TODO enpoint doesnt trigger sometimes, send_file is caching probably, test it
 @genomic.route('/download')
 def download():
    #TODO what if the data doesnt fit in RAM?
-   
    params = get_params_from_request(request)
    query = get_query_from_params(params)
    result = query.all()
    
-   results = [{**log.BindingSiteModel.serialize(), "symbol":log[1], "Protein url":log[4]} for log in result]
+   results = [{**log.PrejoinModel.serialize(), "Protein url":log[1], "Symbol url":"TODO",} for log in result]
    if(len(results) == 0):
       return "No results"
 
@@ -31,7 +31,7 @@ def download():
       dict_writer.writerows(results)
    return send_file('genomic_download.csv', mimetype='text/csv',
                      attachment_filename='genomic_dowload.csv',
-                     as_attachment=True)
+                     as_attachment=True, cache_timeout=0.000001) #, cache_timeout=0
 
 @genomic.route('/search', methods=["GET","POST"])
 #TODO what if db is not running -> crashes
@@ -49,7 +49,6 @@ def search():
          #TODO resolve the token in url some other way, why is it in there in the first place?
          if value and fieldname!='submit' and fieldname!='csrf_token':
             params[fieldname] = value
-            # print(fieldname, value)
       return redirect(
          url_for(
             'genomic.search', 
@@ -62,14 +61,10 @@ def search():
    query = get_query_from_params(params)
    # print(query)
 
-   pagination = query.paginate(page=params['page'], per_page = 23)
+   #TODO dynamic results to fit the page? solve in css
+   pagination = query.paginate(page=params['page'], per_page = 20)
    
-   #TODO remove gene start and end, it's there just for our check
-   serialized = [{**log.BindingSiteModel.serialize(), "symbol":log[1], "Protein url":log[4]} for log in pagination.items]
-
-   show_gene_range = False
-   if(show_gene_range):
-      serialized = [{**dic, "gene_start":log[2], "gene_end":log[3]} for log, dic in zip(pagination.items, serialized)]
+   serialized=[{**log.PrejoinModel.serialize(), "Protein url":log[1], "Symbol url":"TODO"} for log in pagination.items]
 
    #TODO refactor args_without_*, ugly
    args_without_page = {key: value for key, value in request.args.items() if key != 'page'}
@@ -88,6 +83,7 @@ def search():
       secondary_sort_asc_urls = []
       secondary_sort_desc_urls = []
 
+   #TODO remove???
    if not serialized:
       serialized = [{'id': None, 'protein_name': None, 'chr': None, 'start': None, 'end': None, 'strand': None, 'score': None, 'note': None, 'symbol': None, 'gene_start': None, 'gene_end': None, 'Protein url': None}]
 
@@ -166,101 +162,106 @@ def get_query_from_params(params):
 
    #building the filters from parameters
    filters = []
-   if(protein): filters.append(ProteinModel.protein_name == protein)
-   if(symbol): filters.append(GeneModel.symbol == symbol)
-   if(gene_id): filters.append(GeneModel.id == gene_id)
+   if(protein): filters.append(PrejoinModel.protein_name == protein)
+   if(symbol): filters.append(PrejoinModel.symbol == symbol)
+   if(gene_id): filters.append(PrejoinModel.gene_id == gene_id)
    
-   if(loc_min): filters.append(GeneModel.start >= loc_min)
-   if(loc_max): filters.append(GeneModel.end <= loc_max)
+   if(loc_min): filters.append(PrejoinModel.gene_start >= loc_min)
+   if(loc_max): filters.append(PrejoinModel.gene_end <= loc_max)
 
    #checks if not None and if not empty string
-   if(chromozom): filters.append(BindingSiteModel.chr == chromozom)
-   if(area_min): filters.append(BindingSiteModel.start >= area_min)
-   if(area_max): filters.append(BindingSiteModel.end <= area_max)
-   if(score_min): filters.append(BindingSiteModel.score >= score_min)
+   if(chromozom): filters.append(PrejoinModel.chr == chromozom)
+   if(area_min): filters.append(PrejoinModel.bs_start >= area_min)
+   if(area_max): filters.append(PrejoinModel.bs_end <= area_max)
+   if(score_min): filters.append(PrejoinModel.score >= score_min)
    # if(score_max!=None): filters.append(BindingSiteModel.score <= score_max)
 
    
-   #bulding the query 
-   #Legacy query - querying all models, not only binding site
-   #TODO order joins properly
-   # query = db.session.query(BindingSiteModel, ProteinModel.protein_name, GeneModel.symbol)
-   # query = query.join(ProteinModel, ProteinModel.protein_name == BindingSiteModel.protein_name)
-   # query = query.join(GeneModel, GeneModel.chr == BindingSiteModel.chr)
-   # query = query.filter(*filters)
-
+   #ON-LINE QUERY
    #TODO sorting by id doesnt give me all the ids (with no filters) - are we filtering wrong?
-   query = BindingSiteModel.query.join(ProteinModel, ProteinModel.protein_name == BindingSiteModel.protein_name)
-   query = query.join(GeneModel, (GeneModel.symbol == BindingSiteModel.protein_name) & (GeneModel.chr == BindingSiteModel.chr))
-   #TODO uncomment this later, in testing dataset, there are no fitting datapoints  ,>= or > ?
-      # & (BindingSiteModel.end > GeneModel.start) & (BindingSiteModel.start < GeneModel.end))
+   # query = BindingSiteModel.query.join(ProteinModel, ProteinModel.protein_name == BindingSiteModel.protein_name)
+   # query = query.join(GeneModel, (GeneModel.strand == BindingSiteModel.strand) & (GeneModel.chr == BindingSiteModel.chr) & (BindingSiteModel.end > GeneModel.start) & (BindingSiteModel.start < GeneModel.end))
+   # query = query.add_columns(GeneModel.symbol, GeneModel.start, GeneModel.end, ProteinModel.uniprot_url)
+   #TODO Gene and binding site ranges ---  >= or > ?
 
-   #TODO why do we display gene symbol (its the same as protein name always, we are joining on that!)
-   query = query.add_columns(GeneModel.symbol, GeneModel.start, GeneModel.end, ProteinModel.uniprot_url)
+
+   #PREJOINED QUERY
+   #TODO add symbol url
+   query = PrejoinModel.query
+   query = query.join(ProteinModel, ProteinModel.protein_name == PrejoinModel.protein_name)
+   query = query.add_columns(ProteinModel.uniprot_url)
+
+   #Filtering
    query = query.filter(*filters)
 
    #sorting
    #TODO make another argument direction (desc, asc), instead of hardcoding every combination
    #TODO i display only 3 decimals for score - if i sort by score primarily and secondarily by something else, the table looks weird, because the full score isnt displayed
-   if(sortby == 'score_asc'): query = query.order_by(BindingSiteModel.score.asc())
-   if(sortby == 'score_desc'): query = query.order_by(BindingSiteModel.score.desc())
+   if(sortby == 'score_asc'): query = query.order_by(PrejoinModel.score.asc())
+   if(sortby == 'score_desc'): query = query.order_by(PrejoinModel.score.desc())
 
-   if(sortby == 'protein_name_asc'): query = query.order_by(BindingSiteModel.protein_name.asc())
-   if(sortby == 'protein_name_desc'): query = query.order_by(BindingSiteModel.protein_name.desc())
+   if(sortby == 'protein_name_asc'): query = query.order_by(PrejoinModel.protein_name.asc())
+   if(sortby == 'protein_name_desc'): query = query.order_by(PrejoinModel.protein_name.desc())
 
-   if(sortby == 'chr_asc'): query = query.order_by(GeneModel.chr.asc())
-   if(sortby == 'chr_desc'): query = query.order_by(GeneModel.chr.desc())
+   if(sortby == 'chr_asc'): query = query.order_by(PrejoinModel.chr.asc())
+   if(sortby == 'chr_desc'): query = query.order_by(PrejoinModel.chr.desc())
 
-   if(sortby == 'start_asc'): query = query.order_by(BindingSiteModel.start.asc())
-   if(sortby == 'start_desc'): query = query.order_by(BindingSiteModel.start.desc())
+   if(sortby == 'start_asc'): query = query.order_by(PrejoinModel.bs_start.asc())
+   if(sortby == 'start_desc'): query = query.order_by(PrejoinModel.bs_start.desc())
 
-   if(sortby == 'end_asc'): query = query.order_by(BindingSiteModel.end.asc())
-   if(sortby == 'end_desc'): query = query.order_by(BindingSiteModel.end.desc())
+   if(sortby == 'end_asc'): query = query.order_by(PrejoinModel.bs_end.asc())
+   if(sortby == 'end_desc'): query = query.order_by(PrejoinModel.bs_end.desc())
 
-   if(sortby == 'strand_asc'): query = query.order_by(BindingSiteModel.strand.asc())
-   if(sortby == 'strand_desc'): query = query.order_by(BindingSiteModel.strand.desc())
+   if(sortby == 'strand_asc'): query = query.order_by(PrejoinModel.strand.asc())
+   if(sortby == 'strand_desc'): query = query.order_by(PrejoinModel.strand.desc())
   
-   if(sortby == 'symbol_asc'): query = query.order_by(GeneModel.symbol.asc())
-   if(sortby == 'symbol_desc'): query = query.order_by(GeneModel.symbol.desc())
+   if(sortby == 'symbol_asc'): query = query.order_by(PrejoinModel.symbol.asc())
+   if(sortby == 'symbol_desc'): query = query.order_by(PrejoinModel.symbol.desc())
 
-   if(sortby == 'gene_start_asc'): query = query.order_by(GeneModel.start.asc())
-   if(sortby == 'gene_start_desc'): query = query.order_by(GeneModel.start.desc())
+   if(sortby == 'gene_start_asc'): query = query.order_by(PrejoinModel.gene_start.asc())
+   if(sortby == 'gene_start_desc'): query = query.order_by(PrejoinModel.gene_start.desc())
 
-   if(sortby == 'gene_end_asc'): query = query.order_by(GeneModel.end.asc())
-   if(sortby == 'gene_end_desc'): query = query.order_by(GeneModel.end.desc())
+   if(sortby == 'gene_end_asc'): query = query.order_by(PrejoinModel.gene_end.asc())
+   if(sortby == 'gene_end_desc'): query = query.order_by(PrejoinModel.gene_end.desc())
 
-   if(sortby == 'id_asc'): query = query.order_by(BindingSiteModel.id.asc())
-   if(sortby == 'id_desc'): query = query.order_by(BindingSiteModel.id.desc())
+   # if(sortby == 'id_asc'): query = query.order_by(BindingSiteModel.id.asc())
+   # if(sortby == 'id_desc'): query = query.order_by(BindingSiteModel.id.desc())
+
+   if(sortby == 'id_asc'): query = query.order_by(PrejoinModel.bs_id.asc())
+   if(sortby == 'id_desc'): query = query.order_by(PrejoinModel.bs_id.desc())
 
 
-   if(sortby_secondary == 'score_asc'): query = query.order_by(BindingSiteModel.score.asc())
-   if(sortby_secondary == 'score_desc'): query = query.order_by(BindingSiteModel.score.desc())
+   if(sortby_secondary == 'score_asc'): query = query.order_by(PrejoinModel.score.asc())
+   if(sortby_secondary == 'score_desc'): query = query.order_by(PrejoinModel.score.desc())
 
-   if(sortby_secondary == 'protein_name_asc'): query = query.order_by(BindingSiteModel.protein_name.asc())
-   if(sortby_secondary == 'protein_name_desc'): query = query.order_by(BindingSiteModel.protein_name.desc())
+   if(sortby_secondary == 'protein_name_asc'): query = query.order_by(PrejoinModel.protein_name.asc())
+   if(sortby_secondary == 'protein_name_desc'): query = query.order_by(PrejoinModel.protein_name.desc())
 
-   if(sortby_secondary == 'chr_asc'): query = query.order_by(GeneModel.chr.asc())
-   if(sortby_secondary == 'chr_desc'): query = query.order_by(GeneModel.chr.desc())
+   # if(sortby_secondary == 'protein_name_asc'): query = query.order_by(BindingSiteModel.protein_name.asc())
+   # if(sortby_secondary == 'protein_name_desc'): query = query.order_by(BindingSiteModel.protein_name.desc())
 
-   if(sortby_secondary == 'start_asc'): query = query.order_by(BindingSiteModel.start.asc())
-   if(sortby_secondary == 'start_desc'): query = query.order_by(BindingSiteModel.start.desc())
+   if(sortby_secondary == 'chr_asc'): query = query.order_by(PrejoinModel.chr.asc())
+   if(sortby_secondary == 'chr_desc'): query = query.order_by(PrejoinModel.chr.desc())
 
-   if(sortby_secondary == 'end_asc'): query = query.order_by(BindingSiteModel.end.asc())
-   if(sortby_secondary == 'end_desc'): query = query.order_by(BindingSiteModel.end.desc())
+   if(sortby_secondary == 'start_asc'): query = query.order_by(PrejoinModel.bs_start.asc())
+   if(sortby_secondary == 'start_desc'): query = query.order_by(PrejoinModel.bs_start.desc())
 
-   if(sortby_secondary == 'strand_asc'): query = query.order_by(BindingSiteModel.strand.asc())
-   if(sortby_secondary == 'strand_desc'): query = query.order_by(BindingSiteModel.strand.desc())
+   if(sortby_secondary == 'end_asc'): query = query.order_by(PrejoinModel.bs_end.asc())
+   if(sortby_secondary == 'end_desc'): query = query.order_by(PrejoinModel.bs_end.desc())
+
+   if(sortby_secondary == 'strand_asc'): query = query.order_by(PrejoinModel.strand.asc())
+   if(sortby_secondary == 'strand_desc'): query = query.order_by(PrejoinModel.strand.desc())
   
-   if(sortby_secondary == 'symbol_asc'): query = query.order_by(GeneModel.symbol.asc())
-   if(sortby_secondary == 'symbol_desc'): query = query.order_by(GeneModel.symbol.desc())
+   if(sortby_secondary == 'symbol_asc'): query = query.order_by(PrejoinModel.symbol.asc())
+   if(sortby_secondary == 'symbol_desc'): query = query.order_by(PrejoinModel.symbol.desc())
 
-   if(sortby_secondary == 'gene_start_asc'): query = query.order_by(GeneModel.start.asc())
-   if(sortby_secondary == 'gene_start_desc'): query = query.order_by(GeneModel.start.desc())
+   if(sortby_secondary == 'gene_start_asc'): query = query.order_by(PrejoinModel.gene_start.asc())
+   if(sortby_secondary == 'gene_start_desc'): query = query.order_by(PrejoinModel.gene_start.desc())
 
-   if(sortby_secondary == 'gene_end_asc'): query = query.order_by(GeneModel.end.asc())
-   if(sortby_secondary == 'gene_end_desc'): query = query.order_by(GeneModel.end.desc())
+   if(sortby_secondary == 'gene_end_asc'): query = query.order_by(PrejoinModel.gene_end.asc())
+   if(sortby_secondary == 'gene_end_desc'): query = query.order_by(PrejoinModel.gene_end.desc())
 
-   if(sortby_secondary == 'id_asc'): query = query.order_by(BindingSiteModel.id.asc())
-   if(sortby_secondary == 'id_desc'): query = query.order_by(BindingSiteModel.id.desc())
+   if(sortby_secondary == 'id_asc'): query = query.order_by(PrejoinModel.bs_id.asc())
+   if(sortby_secondary == 'id_desc'): query = query.order_by(PrejoinModel.bs_id.desc())
 
    return query

@@ -60,7 +60,7 @@
                     <thead class='thead-dark'>
                         <tr>
                             {% for key, value in rows[0].items()%}
-                                {% if key != 'Protein url'%}
+                                {% if key != 'Protein url' and key!='Symbol url'%}
                                 <th>{{key}} <a href="{{primary_sort_asc_urls[key]}}">↥</a> <a href="{{primary_sort_desc_urls[key]}}">↧</a> <a href="{{secondary_sort_asc_urls[key]}}">↟</a> <a href="{{secondary_sort_desc_urls[key]}}">↡</a></th>
                                 {%endif%}
                             {% endfor %}
@@ -71,11 +71,16 @@
                         <tr>
                             {% for key, value in row.items()%}
                                 <!-- TODO hardcoded protein_name and Protein url names - parametrize? -->
-                                {% if (key == "protein_name" or key=='symbol') and value%}
+                                <!-- and value is needed? -->
+                                {% if (key == "protein_name") and value%}
                                 <td><a href="{{row['Protein url']}}">{{value}}</a></td>
+                                {% elif key == "symbol"%}
+                                <td><a href="{{row['Symbol url']}}">{{value}}</a></td>
                                 {%elif key == 'score' and value%}
                                 <td>{{value|round(3, 'floor')}}</td>
-                                {% elif key!= 'Protein url'%}
+                                {%elif key == 'note' and value == None%}
+                                <td>{{""}}</td>
+                                {% elif key!= 'Protein url' and key!= 'Symbol url'%}
                                 <td>{{value}}</td>
                                 {%endif%}
                             {% endfor %}

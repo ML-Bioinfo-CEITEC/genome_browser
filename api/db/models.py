@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Float
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Float, Index
 from sqlalchemy.orm import relationship
 from db.database import Base, engine
 
@@ -43,5 +43,23 @@ class BindingSite(Base):
     score = Column(Float, index=True)
     note = Column(String)
 
-#TODO move to other script
-# Base.metadata.create_all(bind=engine)
+class Prejoin(Base):
+    __tablename__='prejoin'
+    #BS
+    bs_id = Column(Integer, primary_key=True, index=True)
+    protein_name = Column(String, index=True)
+    chr = Column(String, index=True)
+    bs_start = Column(Integer, index=True)
+    bs_end = Column(Integer, index=True)
+    strand = Column(String, index=True)
+    score = Column(Float, index=True)
+    note = Column(String)
+    #GENE
+    gene_id = Column(String, primary_key=True, index=True)
+    symbol = Column(String, index=True)
+    gene_start = Column(Integer, index=True)
+    gene_end = Column(Integer, index=True)
+
+# Indexes for in-ram computing of the join
+# Index('multicolumn_binding_sites', BindingSite.chr, BindingSite.strand, BindingSite.start, BindingSite.end)
+# Index('multicolumn_genes', Gene.chr, Gene.strand, Gene.start, Gene.end)
