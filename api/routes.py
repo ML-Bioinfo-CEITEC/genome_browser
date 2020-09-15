@@ -78,9 +78,10 @@ def search():
    #This is our own paginate implementation
    all_results = query.all()
    page = params['page']
-   pagination = all_results[20*(page - 1):20*page]
+   items_per_page = 20
+   pagination = all_results[items_per_page*(page - 1):items_per_page*page]
    serialized=[{**log.PrejoinModel.serialize(), "Protein url":log[1], "Symbol url":log[2]} for log in pagination]
-   total_pages = int(math.ceil(len(all_results)/20))
+   total_pages = int(math.ceil(len(all_results)/items_per_page))
    has_prev = page > 1
    has_next = page < total_pages
 
