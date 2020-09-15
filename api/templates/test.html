@@ -75,7 +75,12 @@
                                 {% if (key == "protein_name") and value%}
                                 <td><a href="{{row['Protein url']}}">{{value}}</a></td>
                                 {% elif key == "symbol"%}
-                                <td><a href="{{row['Symbol url']}}">{{value}}</a></td>
+                                <!-- TODO give similar treatment to protein_url ? what if there is no url for it? -->
+                                    {% if row['Symbol url'] == None%}
+                                    <td>{{value}}</td>
+                                    {%else%}
+                                    <td><a href="{{row['Symbol url']}}">{{value}}</a></td>
+                                    {%endif%}
                                 {%elif key == 'score' and value%}
                                 <td>{{value|round(3, 'floor')}}</td>
                                 {%elif key == 'note' and value == None%}

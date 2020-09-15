@@ -7,6 +7,7 @@ from flask_table import Table, Col, LinkCol
 from flask_table.html import element
 import csv
 from table import MyTable, sort_type_getter
+from sqlalchemy.orm import aliased
 
 genomic = Blueprint('genomic', __name__)
 
@@ -18,7 +19,7 @@ def download():
    query = get_query_from_params(params)
    result = query.all()
    
-   results = [{**log.PrejoinModel.serialize(), "Protein url":log[1], "Symbol url":"TODO",} for log in result]
+   results = [{**log.PrejoinModel.serialize(), "Protein url":log[1], "Symbol url":log[2],} for log in result]
    if(len(results) == 0):
       return "No results"
 
@@ -63,8 +64,7 @@ def search():
 
    #TODO dynamic results to fit the page? solve in css
    pagination = query.paginate(page=params['page'], per_page = 20)
-   
-   serialized=[{**log.PrejoinModel.serialize(), "Protein url":log[1], "Symbol url":"TODO"} for log in pagination.items]
+   serialized=[{**log.PrejoinModel.serialize(), "Protein url":log[1], "Symbol url":log[2]} for log in pagination.items]
 
    #TODO refactor args_without_*, ugly
    args_without_page = {key: value for key, value in request.args.items() if key != 'page'}
@@ -187,9 +187,13 @@ def get_query_from_params(params):
 
    #PREJOINED QUERY
    #TODO add symbol url
+   p1 = aliased(ProteinModel)
+   p2 = aliased(ProteinModel)
+
    query = PrejoinModel.query
-   query = query.join(ProteinModel, ProteinModel.protein_name == PrejoinModel.protein_name)
-   query = query.add_columns(ProteinModel.uniprot_url)
+   query = query.outerjoin(p1, p1.protein_name == PrejoinModel.protein_name)
+   query = query.outerjoin(p2, p2.protein_name == PrejoinModel.symbol)
+   query = query.with_entities(PrejoinModel, p1.uniprot_url, p2.uniprot_url)
 
    #Filtering
    query = query.filter(*filters)
