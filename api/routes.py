@@ -20,33 +20,21 @@ def download():
 
    return send_csv(results,"genomic_download.csv",results[0].keys())
 
-@genomic.route('/search', methods=["POST"])
-def search_post():
+@genomic.route('/search', methods=["GET", "POST"])
+#TODO what if db is not running -> crashes
+#TODO verify attributed, server crashes if wrong arguments supplied, try testing it, wrong datatype etc...
+def search():
    searchform = SearchForm()
    params = {}
    for fieldname, value in searchform.data.items():
-      #TODO resolve the token in url some other way, why is it in there in the first place?
       if value and fieldname!='submit' and fieldname!='csrf_token':
          params[fieldname] = value
 
    if(searchform.validate_on_submit()):
       return redirect(url_for('genomic.search',page=1,**params,))
 
-   #TODO non-valid form, alert user?
-   return redirect(
-         url_for(
-            'genomic.search', 
-            page=1, 
-            **params,
-         )
-      )
 
-@genomic.route('/search', methods=["GET"])
-#TODO what if db is not running -> crashes
-#TODO verify attributed, server crashes if wrong arguments supplied, try testing it, wrong datatype etc...
-def search():
-   searchform = SearchForm()
-
+   #TODO second definition of params - rename first occurence
    params = get_params_from_request(request)
    query = get_query_from_params(params)
 

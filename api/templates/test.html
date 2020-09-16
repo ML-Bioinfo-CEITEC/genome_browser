@@ -11,38 +11,65 @@
                     <p>
                         {{ form.chromozom.label }}<br>
                         {{ form.chromozom(size=16, value=params['chromozom'], class_='form-control form-control-sm') }}
+                        {% for error in form.chromozom.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
                     </p>
                     <p>
                         {{ form.protein_name.label }}<br>
                         {{ form.protein_name(size=16, value=params['protein'], class_='form-control form-control-sm') }}
+                        {% for error in form.protein_name.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
                     </p>
                     <p>
                         {{ form.gene_id.label }}<br>
                         {{ form.gene_id(size=16, value=params['gene_id'], class_='form-control form-control-sm') }}
+                        {% for error in form.gene_id.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
                     </p>
                     <p>
                         {{ form.symbol.label }}<br>
                         {{ form.symbol(size=16, value=params['symbol'], class_='form-control form-control-sm') }}
+                        {% for error in form.symbol.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
                     </p>
                     <p>
                         {{ form.area_min.label }}<br>
                         {{ form.area_min(size=16, value=params['area_min'], class_='form-control form-control-sm') }}
+                        {% for error in form.area_min.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
                     </p>
                     <p>
                         {{ form.area_max.label }}<br>
                         {{ form.area_max(size=16, value=params['area_max'], class_='form-control form-control-sm') }}
+                        {% for error in form.area_max.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
                     </p>
                     <p>
                         {{ form.loc_min.label }}<br>
                         {{ form.loc_min(size=16, value=params['loc_min'], class_='form-control form-control-sm') }}
+                        {% for error in form.loc_min.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
                     </p>
                     <p>
                         {{ form.loc_max.label }}<br>
                         {{ form.loc_max(size=16, value=params['loc_max'], class_='form-control form-control-sm') }}
+                        {% for error in form.loc_max.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
                     </p>
                     <p>
                         {{ form.score_min.label }}<br>
                         {{ form.score_min(size=16, value=params['score_min'], class_='form-control form-control-sm') }}
+                        {% for error in form.score_min.errors %}
+                            <span style="color: red;">[{{ error }}]</span>
+                        {% endfor %}
                     </p>
                     <div>
                         <p>{{form.submit()}}</p>
