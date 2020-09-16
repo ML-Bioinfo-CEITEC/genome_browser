@@ -1,4 +1,4 @@
-from flask import jsonify, request, Blueprint, render_template, url_for, redirect, make_response, send_file, Response
+from flask import jsonify, request, Blueprint, render_template, url_for, redirect, make_response, send_file, Response, after_this_request
 from models import ProteinModel, BindingSiteModel, GeneModel, PrejoinModel
 from db.database import db
 from forms import SearchForm
@@ -9,39 +9,23 @@ import csv
 from table import MyTable, sort_type_getter
 from sqlalchemy.orm import aliased
 import math
+import os 
+from flask_csv import send_csv
 
 genomic = Blueprint('genomic', __name__)
 
 @genomic.route('/download')
 def download():
    #TODO what if the data doesnt fit in RAM?
-   print('trigger')
    params = get_params_from_request(request)
    query = get_query_from_params(params)
    result = query.all()
-
-   results = [{**log.PrejoinModel.serialize(), "Protein url":log[1], "Symbol url":log[2],} for log in result]
-   if(len(results) == 0):
+   if(len(result) == 0):
       return "No results"
+   results = [{**log.PrejoinModel.serialize(), "Protein url":log[1], "Symbol url":log[2],} for log in result]
 
-   #TODO delete csv afterwards?
-   keys = results[0].keys()
-   with open('genomic_download.csv', 'w', newline='') as output_file:
-      dict_writer = csv.DictWriter(output_file, keys)
-      dict_writer.writeheader()
-      dict_writer.writerows(results)
-   #TODO add header for NOT CACHING (Browser caches the result!)
+   return send_csv(results,"genomic_download.csv",results[0].keys())
 
-
-   send = send_file('genomic_download.csv', mimetype='text/csv',
-                     attachment_filename='genomic_dowload.csv',
-                     as_attachment=True) 
-   r = make_response(send)
-   #TODO chaching is OK? The problem was in pagination
-   r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, public, max-age=0"
-   r.headers["Pragma"] = "no-cache"
-   r.headers["Expires"] = "0"
-   return r
    
 
 @genomic.route('/search', methods=["GET","POST"])
