@@ -11,6 +11,7 @@ from sqlalchemy.orm import aliased
 import math
 import os 
 from flask_csv import send_csv
+from copy import copy
 
 genomic = Blueprint('genomic', __name__)
 
@@ -36,6 +37,7 @@ def search():
    searchform = SearchForm()
 
    #If form is not valid, this if is False!!! 
+   #TODO handle searchform function extract
    if(searchform.validate_on_submit()):
       params = {}
       for fieldname, value in searchform.data.items():
@@ -56,31 +58,21 @@ def search():
    #TODO dynamic results to fit the page? solve in css
    pagination = Pagination(query, per_page=20)
    serialized = pagination.get_page(params['page'])
-
+   header_keys = serialized[0].keys() if serialized else {}
+   
    #TODO refactor args_without_*, ugly
+   # dic = {key:value for key, value in request.args.items())
    args_without_page = {key: value for key, value in request.args.items() if key != 'page'}
    args_without_secondary_sort = {key: value for key, value in request.args.items() if key != 'sort_by_secondary'}
    args_without_primary_sort = {key: value for key, value in request.args.items() if key != 'sort_by'}
 
-
-   if serialized:
-      primary_sort_asc_urls = {column: url_for('genomic.search', sort_by=f"{column}_asc", **args_without_primary_sort) for column in serialized[0].keys()}
-      primary_sort_desc_urls = {column: url_for('genomic.search', sort_by=f"{column}_desc", **args_without_primary_sort) for column in serialized[0].keys()}
-      secondary_sort_asc_urls = {column: url_for('genomic.search', sort_by_secondary=f"{column}_asc", **args_without_secondary_sort) for column in serialized[0].keys()}
-      secondary_sort_desc_urls = {column: url_for('genomic.search', sort_by_secondary=f"{column}_desc", **args_without_secondary_sort) for column in serialized[0].keys()}
-   else:
-      primary_sort_asc_urls = []
-      primary_sort_desc_urls = []
-      secondary_sort_asc_urls = []
-      secondary_sort_desc_urls = []
-
-   #TODO remove???
-   if not serialized:
-      serialized = [{'id': None, 'protein_name': None, 'chr': None, 'start': None, 'end': None, 'strand': None, 'score': None, 'note': None, 'symbol': None, 'gene_start': None, 'gene_end': None, 'Protein url': None}]
+   primary_sort_asc_urls = {column: url_for('genomic.search', sort_by=f"{column}_asc", **args_without_primary_sort) for column in header_keys}
+   primary_sort_desc_urls = {column: url_for('genomic.search', sort_by=f"{column}_desc", **args_without_primary_sort) for column in header_keys}
+   secondary_sort_asc_urls = {column: url_for('genomic.search', sort_by_secondary=f"{column}_asc", **args_without_secondary_sort) for column in header_keys}
+   secondary_sort_desc_urls = {column: url_for('genomic.search', sort_by_secondary=f"{column}_desc", **args_without_secondary_sort) for column in header_keys}
 
    return render_template(
       'test.html',
-      # table = table,
       rows=serialized, 
       page = params['page'], 
       pages = pagination.total_pages,
