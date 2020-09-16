@@ -25,16 +25,15 @@ def download():
 #TODO verify attributed, server crashes if wrong arguments supplied, try testing it, wrong datatype etc...
 def search():
    searchform = SearchForm()
-   params = {}
+   form_params = {}
    for fieldname, value in searchform.data.items():
       if value and fieldname!='submit' and fieldname!='csrf_token':
-         params[fieldname] = value
+         form_params[fieldname] = value
 
    if(searchform.validate_on_submit()):
-      return redirect(url_for('genomic.search',page=1,**params,))
+      return redirect(url_for('genomic.search',page=1,**form_params,))
 
 
-   #TODO second definition of params - rename first occurence
    params = get_params_from_request(request)
    query = get_query_from_params(params)
 
