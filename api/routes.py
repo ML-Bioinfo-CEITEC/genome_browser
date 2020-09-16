@@ -59,9 +59,7 @@ def search():
    pagination = Pagination(query, per_page=20)
    serialized = pagination.get_page(params['page'])
    header_keys = serialized[0].keys() if serialized else {}
-   
-   #TODO refactor args_without_*, ugly
-   # dic = {key:value for key, value in request.args.items())
+
    args_without_page = {key: value for key, value in request.args.items() if key != 'page'}
    args_without_secondary_sort = {key: value for key, value in request.args.items() if key != 'sort_by_secondary'}
    args_without_primary_sort = {key: value for key, value in request.args.items() if key != 'sort_by'}
@@ -74,8 +72,9 @@ def search():
    return render_template(
       'test.html',
       rows=serialized, 
-      page = params['page'], 
       pages = pagination.total_pages,
+      has_prev = pagination.has_prev,
+      has_next = pagination.has_next,
       prev_page_url = url_for('genomic.search', page=params['page']-1, **args_without_page),
       next_page_url = url_for('genomic.search', page=params['page']+1, **args_without_page),
       download_url = url_for('genomic.download', **dict(request.args.items())),
@@ -83,19 +82,8 @@ def search():
       primary_sort_desc_urls = primary_sort_desc_urls,
       secondary_sort_asc_urls = secondary_sort_asc_urls,
       secondary_sort_desc_urls = secondary_sort_desc_urls,
-      has_prev = pagination.has_prev,
-      has_next = pagination.has_next,
       form = searchform,
-      chromozom_default = params['chromozom'],
-      protein_default = params['protein'],
-      symbol_default = params['symbol'],
-      sort_by_default = params['sortby'],
-      area_min_default = params['area_min'],
-      area_max_default = params['area_max'],
-      loc_min_default = params['loc_min'],
-      loc_max_default = params['loc_max'],
-      score_min_default = params['score_min'],
-      gene_id_default = params['gene_id'],
+      params = params,
    )
 
 def get_params_from_request(request):
@@ -260,6 +248,7 @@ class Pagination():
 
       def get_page(self, page):
          all_results = self.query.all()
+         #TODO add sensible default for following attributes?
          self.total_pages = int(math.ceil(len(all_results)/self.per_page))
          self.has_prev = page > 1
          self.has_next = page < self.total_pages   

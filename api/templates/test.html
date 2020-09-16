@@ -10,39 +10,39 @@
                     {{ form.hidden_tag() }}
                     <p>
                         {{ form.chromozom.label }}<br>
-                        {{ form.chromozom(size=16, value=chromozom_default, class_='form-control form-control-sm') }}
+                        {{ form.chromozom(size=16, value=params['chromozom'], class_='form-control form-control-sm') }}
                     </p>
                     <p>
                         {{ form.protein_name.label }}<br>
-                        {{ form.protein_name(size=16, value=protein_default, class_='form-control form-control-sm') }}
+                        {{ form.protein_name(size=16, value=params['protein'], class_='form-control form-control-sm') }}
                     </p>
                     <p>
                         {{ form.gene_id.label }}<br>
-                        {{ form.gene_id(size=16, value=gene_id_default, class_='form-control form-control-sm') }}
+                        {{ form.gene_id(size=16, value=params['gene_id'], class_='form-control form-control-sm') }}
                     </p>
                     <p>
                         {{ form.symbol.label }}<br>
-                        {{ form.symbol(size=16, value=symbol_default, class_='form-control form-control-sm') }}
+                        {{ form.symbol(size=16, value=params['symbol'], class_='form-control form-control-sm') }}
                     </p>
                     <p>
                         {{ form.area_min.label }}<br>
-                        {{ form.area_min(size=16, value=area_min_default, class_='form-control form-control-sm') }}
+                        {{ form.area_min(size=16, value=params['area_min'], class_='form-control form-control-sm') }}
                     </p>
                     <p>
                         {{ form.area_max.label }}<br>
-                        {{ form.area_max(size=16, value=area_max_default, class_='form-control form-control-sm') }}
+                        {{ form.area_max(size=16, value=params['area_max'], class_='form-control form-control-sm') }}
                     </p>
                     <p>
                         {{ form.loc_min.label }}<br>
-                        {{ form.loc_min(size=16, value=loc_min_default, class_='form-control form-control-sm') }}
+                        {{ form.loc_min(size=16, value=params['loc_min'], class_='form-control form-control-sm') }}
                     </p>
                     <p>
                         {{ form.loc_max.label }}<br>
-                        {{ form.loc_max(size=16, value=loc_max_default, class_='form-control form-control-sm') }}
+                        {{ form.loc_max(size=16, value=params['loc_max'], class_='form-control form-control-sm') }}
                     </p>
                     <p>
                         {{ form.score_min.label }}<br>
-                        {{ form.score_min(size=16, value=score_min_default, class_='form-control form-control-sm') }}
+                        {{ form.score_min(size=16, value=params['score_min'], class_='form-control form-control-sm') }}
                     </p>
                     <div>
                         <p>{{form.submit()}}</p>
@@ -106,7 +106,7 @@
             <a href="{{ next_page_url }}">NEXT</a>
             {% endif %}
             {% if rows|length > 0 %}
-                <div>Page {{page}} / {{pages}}</div>
+                <div>Page {{params['page']}} / {{pages}}</div>
                 </div>
             {% else %}
             <div style="margin-top: 20px; font-weight: bold">
