@@ -24,7 +24,7 @@ def get_params_from_request(request):
 
    #control elements
    params["page"] = request.args.get('page', type=int, default = 1)
-   params["sortby"] = request.args.get('sort_by', type=str, default='id_desc')
+   params["sortby"] = request.args.get('sort_by', type=str, default='id_asc')
    params["sortby_secondary"] = request.args.get('sort_by_secondary', type=str, default=None)
    
    #sorting by secondary first does nothing (sorting by id is the hidden default), thus this fix

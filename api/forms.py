@@ -3,9 +3,7 @@ from wtforms import StringField, SubmitField, RadioField, IntegerField, SelectFi
 from wtforms.validators import DataRequired, Optional
 
 class SearchForm(FlaskForm):
-    #TODO remove validators? can be empty
     chromozom = StringField('chromozom')
-    # protein_name = StringField('protein name', validators=[DataRequired()])
     protein_name = StringField('protein name')
     symbol = StringField('gene symbol')
     gene_id = StringField('gene id')

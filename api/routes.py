@@ -2,11 +2,7 @@ from flask import jsonify, request, Blueprint, render_template, url_for, redirec
 from models import ProteinModel, BindingSiteModel, GeneModel, PrejoinModel
 from db.database import db
 from forms import SearchForm
-from copy import deepcopy
-from flask_table import Table, Col, LinkCol
-from flask_table.html import element
 import csv
-from table import MyTable, sort_type_getter
 from flask_csv import send_csv
 from api_helpers import get_params_from_request, get_query_from_params, Pagination
 
@@ -48,8 +44,6 @@ def search_post():
 @genomic.route('/search', methods=["GET"])
 #TODO what if db is not running -> crashes
 #TODO verify attributed, server crashes if wrong arguments supplied, try testing it, wrong datatype etc...
-#TODO empty result - crashes in multiple places
-#TODO add cache for back button etc?
 def search():
    searchform = SearchForm()
 
