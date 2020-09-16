@@ -8,6 +8,10 @@ from api_helpers import get_params_from_request, get_query_from_params, Paginati
 
 genomic = Blueprint('genomic', __name__)
 
+@genomic.route('/')
+def index():
+   return redirect("http://127.0.0.1:5000/search", code=302)
+
 @genomic.route('/download')
 def download():
    #TODO what if the data doesnt fit in RAM?
