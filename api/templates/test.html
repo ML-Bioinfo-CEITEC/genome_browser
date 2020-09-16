@@ -72,13 +72,9 @@
                         {% endfor %}
                     </p>
                     <div>
-                        <p>{{form.submit()}}</p>
-                        
+                        <button type="submit" class="btn btn-sm btn-primary">Search</button>
                     </div>
                 </form>
-                {% if rows | length > 0 %}
-                <a href="{{download_url}}">DOWNLOAD</a>
-                {% endif %}
             </div>
 
             <div style="margin-left: 220px;">
@@ -123,24 +119,33 @@
                 </table>
             </div>
 
-
-
-        <div style="margin-left: 220px;">
-            {%if has_prev %}
-            <a href="{{ prev_page_url }}">PREVIOUS</a>
+        <div style="margin-left: 220px; margin-bottom: 10%;">
+            {% if has_prev %}
+                <a href="{{ prev_page_url }}" type="button" class="btn btn-sm btn-primary">Previous</a>
+            {% else %}
+                <a href="{{ prev_page_url }}" type="button" class="btn btn-sm btn-primary disabled" aria-disabled="true" style="opacity: 0.3;">Previous</a>
             {% endif %}
-            {%if has_next %}
-            <a href="{{ next_page_url }}">NEXT</a>
+            <!-- <a href="{{ prev_page_url }}">PREVIOUS</a> -->
+            {% if has_next %} 
+                <a href="{{ next_page_url }}" type="button" class="btn btn-sm btn-primary">Next</a>
+                <!-- <a href="{{ next_page_url }}">Next</a> -->
+            {% else %}
+                <a href="{{ next_page_url }}" type="button" class="btn btn-sm btn-primary disabled" aria-disabled="true" style="opacity: 0.3;">Next</a>
+            {% endif %} 
+        
+            {% if rows | length > 0 %}
+            <a href="{{download_url}}" type="button" class="btn btn-sm btn-primary" style="float: right; margin-right: 2%;">Download</a>
             {% endif %}
+
             {% if rows|length > 0 %}
-                <div>Page {{params['page']}} / {{pages}}</div>
-                </div>
+            <div>Page {{params['page']}} / {{pages}}</div>
             {% else %}
             <div style="margin-top: 20px; font-weight: bold">
                 <div>Empty search result</div>
             </div>
             {% endif %}
         </div>
+        
         
     </body>
 </html>
