@@ -76,7 +76,7 @@ def get_query_from_params(params):
 
    #sorting
    #TODO make another argument direction (desc, asc), instead of hardcoding every combination
-   #TODO i display only 3 decimals for score - if i sort by score primarily and secondarily by something else, the table looks weird, because the full score isnt displayed
+   #i display only 3 decimals for score - if i sort by score primarily and secondarily by something else, the table looks weird, because the full score isnt displayed
    if(sortby == 'score_asc'): query = query.order_by(PrejoinModel.score.asc())
    if(sortby == 'score_desc'): query = query.order_by(PrejoinModel.score.desc())
 
@@ -148,7 +148,6 @@ class Pagination():
 
    def get_page(self, page):
       all_results = self.query.all()
-      #TODO add sensible default for following attributes?
       self.total_pages = int(math.ceil(len(all_results)/self.per_page))
       self.has_prev = page > 1
       self.has_next = page < self.total_pages   

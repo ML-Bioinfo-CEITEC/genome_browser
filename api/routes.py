@@ -17,7 +17,10 @@ def download():
    #TODO what if the data doesnt fit in RAM?
    params = get_params_from_request(request)
    query = get_query_from_params(params)
-   result = query.all()
+   try:
+      result = query.all()
+   except:
+      return '500 Internal Server Error', 500
    if(len(result) == 0):
       return "No results"
    results = [{**log.PrejoinModel.serialize(), "Protein url":log[1], "Symbol url":log[2],} for log in result]
@@ -25,7 +28,6 @@ def download():
    return send_csv(results,"genomic_download.csv",results[0].keys())
 
 @genomic.route('/search', methods=["GET", "POST"])
-#TODO what if db is not running -> crashes
 #TODO verify attributed, server crashes if wrong arguments supplied, try testing it, wrong datatype etc...
 def search():
    searchform = SearchForm()
@@ -43,7 +45,11 @@ def search():
 
    #TODO dynamic results to fit the page? solve in css
    pagination = Pagination(query, per_page=20)
-   serialized = pagination.get_page(params['page'])
+   try:
+      serialized = pagination.get_page(params['page'])
+   except:
+      return '500 Internal Server Error',500
+   
    header_keys = serialized[0].keys() if serialized else {}
 
    args_without_page = {key: value for key, value in request.args.items() if key != 'page'}

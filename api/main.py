@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from db.database import SQLALCHEMY_DATABASE_URL
+from db.config import SQLALCHEMY_DATABASE_URL, SECRET_KEY
 from models import ProteinModel, BindingSiteModel, GeneModel
 from routes import genomic
 from db.database import db
@@ -11,7 +11,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URL
 #TODO remove in production
 app.config['DEBUG'] = True
 #Sectet key is needed because of forms https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-iii-web-forms
-app.config['SECRET_KEY'] = 'muchos gracios'
+app.config['SECRET_KEY'] = SECRET_KEY
 
 db.init_app(app)
 #TODO migrations?
