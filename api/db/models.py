@@ -9,8 +9,6 @@ class Protein(Base):
     protein_id = Column(String, primary_key=True, index=True)
     uniprot_url = Column(String, index=True)
 
-    # bindings = relationship("BindingSite", back_populates="protein_name")
-
 
 class Gene(Base):
     __tablename__ = "genes"
@@ -22,13 +20,6 @@ class Gene(Base):
     start = Column(Integer, index=True)
     end = Column(Integer, index=True)
     strand = Column(String, index=True)
-
-    # tento relationship bude asi trochu tricky
-    # na zacatku set up-nout DB bez nej
-    # je vubec treba?
-
-    # binding_sites = relationship("BindingSite")
-    # binding_sites = relationship('BindingSite', primaryjoin='foreign(genes.symbol) == bindings_site.protein_name')
 
 
 class BindingSite(Base):
@@ -86,8 +77,3 @@ class Prejoin(Base):
         self.symbol = symbol,
         self.gene_start = gene_start,
         self.gene_end = gene_end
-        
-
-# Indexes for in-ram computing of the join
-# Index('multicolumn_binding_sites', BindingSite.chr, BindingSite.strand, BindingSite.start, BindingSite.end)
-# Index('multicolumn_genes', Gene.chr, Gene.strand, Gene.start, Gene.end)
