@@ -1,4 +1,4 @@
-from flask import jsonify, request, Blueprint, render_template, url_for, redirect, make_response, send_file, Response, after_this_request
+from flask import jsonify, request, Blueprint, render_template, url_for, redirect
 from models import ProteinModel, BindingSiteModel, GeneModel, PrejoinModel
 from db.database import db
 from forms import SearchForm
@@ -9,9 +9,7 @@ import csv
 from table import MyTable, sort_type_getter
 from sqlalchemy.orm import aliased
 import math
-import os 
 from flask_csv import send_csv
-from copy import copy
 
 genomic = Blueprint('genomic', __name__)
 
@@ -27,30 +25,34 @@ def download():
 
    return send_csv(results,"genomic_download.csv",results[0].keys())
 
-@genomic.route('/search', methods=["GET","POST"])
-#TODO what if db is not running -> crashes
-#TODO verify attributed, server crashes if wrong arguments supplied, try testing it, wrong datatype etc...
-#TODO empty result - crashes in multiple places
-#TODO add cache for back button etc?
-def search():
-   #check for search form sumbission
+@genomic.route('/search', methods=["POST"])
+def search_post():
    searchform = SearchForm()
+   params = {}
+   for fieldname, value in searchform.data.items():
+      #TODO resolve the token in url some other way, why is it in there in the first place?
+      if value and fieldname!='submit' and fieldname!='csrf_token':
+         params[fieldname] = value
 
-   #If form is not valid, this if is False!!! 
-   #TODO handle searchform function extract
    if(searchform.validate_on_submit()):
-      params = {}
-      for fieldname, value in searchform.data.items():
-         #TODO resolve the token in url some other way, why is it in there in the first place?
-         if value and fieldname!='submit' and fieldname!='csrf_token':
-            params[fieldname] = value
-      return redirect(
+      return redirect(url_for('genomic.search',page=1,**params,))
+
+   #TODO non-valid form, alert user?
+   return redirect(
          url_for(
             'genomic.search', 
             page=1, 
             **params,
          )
       )
+
+@genomic.route('/search', methods=["GET"])
+#TODO what if db is not running -> crashes
+#TODO verify attributed, server crashes if wrong arguments supplied, try testing it, wrong datatype etc...
+#TODO empty result - crashes in multiple places
+#TODO add cache for back button etc?
+def search():
+   searchform = SearchForm()
 
    params = get_params_from_request(request)
    query = get_query_from_params(params)
