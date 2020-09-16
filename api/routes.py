@@ -26,8 +26,6 @@ def download():
 
    return send_csv(results,"genomic_download.csv",results[0].keys())
 
-   
-
 @genomic.route('/search', methods=["GET","POST"])
 #TODO what if db is not running -> crashes
 #TODO verify attributed, server crashes if wrong arguments supplied, try testing it, wrong datatype etc...
@@ -54,26 +52,10 @@ def search():
 
    params = get_params_from_request(request)
    query = get_query_from_params(params)
-   # print(query)
 
    #TODO dynamic results to fit the page? solve in css
-
-   #TODO pagination orders differently than normal sql - this is the source of order incosistency in download and in displayed table
-   #This is our own paginate implementation
-   all_results = query.all()
-   page = params['page']
-   items_per_page = 20
-   pagination = all_results[items_per_page*(page - 1):items_per_page*page]
-   serialized=[{**log.PrejoinModel.serialize(), "Protein url":log[1], "Symbol url":log[2]} for log in pagination]
-   total_pages = int(math.ceil(len(all_results)/items_per_page))
-   has_prev = page > 1
-   has_next = page < total_pages
-
-   # pagination = query.paginate(page=params['page'], per_page = 20)
-   # serialized=[{**log.PrejoinModel.serialize(), "Protein url":log[1], "Symbol url":log[2]} for log in pagination.items]
-   # total_pages = pagination.pages
-   # has_prev = pagination.has_prev
-   # has_next = pagination.has_next
+   pagination = Pagination(query, per_page=20)
+   serialized = pagination.get_page(params['page'])
 
    #TODO refactor args_without_*, ugly
    args_without_page = {key: value for key, value in request.args.items() if key != 'page'}
@@ -101,7 +83,7 @@ def search():
       # table = table,
       rows=serialized, 
       page = params['page'], 
-      pages = total_pages,
+      pages = pagination.total_pages,
       prev_page_url = url_for('genomic.search', page=params['page']-1, **args_without_page),
       next_page_url = url_for('genomic.search', page=params['page']+1, **args_without_page),
       download_url = url_for('genomic.download', **dict(request.args.items())),
@@ -109,8 +91,8 @@ def search():
       primary_sort_desc_urls = primary_sort_desc_urls,
       secondary_sort_asc_urls = secondary_sort_asc_urls,
       secondary_sort_desc_urls = secondary_sort_desc_urls,
-      has_prev = has_prev,
-      has_next = has_next,
+      has_prev = pagination.has_prev,
+      has_next = pagination.has_next,
       form = searchform,
       chromozom_default = params['chromozom'],
       protein_default = params['protein'],
@@ -277,3 +259,19 @@ def get_query_from_params(params):
       if(sortby_secondary == 'id_desc'): query = query.order_by(PrejoinModel.bs_id.desc())
 
    return query
+
+#TODO extract to file
+class Pagination():
+      def __init__(self, query, per_page):
+         self.per_page = per_page
+         self.query = query
+
+      def get_page(self, page):
+         all_results = self.query.all()
+         self.total_pages = int(math.ceil(len(all_results)/self.per_page))
+         self.has_prev = page > 1
+         self.has_next = page < self.total_pages   
+
+         pagination = all_results[self.per_page*(page - 1):self.per_page*page]
+         serialized=[{**log.PrejoinModel.serialize(), "Protein url":log[1], "Symbol url":log[2]} for log in pagination]
+         return serialized
