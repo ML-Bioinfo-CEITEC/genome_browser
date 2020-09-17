@@ -1,4 +1,4 @@
-from db.import_data import import_binding_sites, import_proteins, import_genes, import_to_prejoin, analyze, cleanup, recreate_all_tables
+from db.import_data_utils import import_binding_sites, import_proteins, import_genes, import_to_prejoin, analyze, cleanup, recreate_all_tables
 
 recreate_all_tables()
 import_binding_sites()

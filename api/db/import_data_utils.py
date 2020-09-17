@@ -5,12 +5,14 @@ from db.models import Prejoin, Gene, BindingSite, Protein
 from models import PrejoinModel, BindingSiteModel, GeneModel
 from sqlalchemy import orm
 import db.models
-    
 
+
+
+base_path = Path(__file__).parent/"csv_files"
 def import_proteins():
     # open file
-    base_path = Path(__file__).parent
-    csv_file_path = base_path / 'dummy_protein_df.csv'
+    folder_path = base_path /"proteins"
+    csv_file_path = list(folder_path.iterdir())[0]
     data_df = pd.read_csv(csv_file_path)
 
     # import to sql
@@ -19,8 +21,8 @@ def import_proteins():
 
 def import_binding_sites():
     # open file
-    base_path = Path(__file__).parent
-    csv_file_path = base_path / 'dummy_binding_sites_df.csv'
+    folder_path = base_path /"binding_sites"
+    csv_file_path = list(folder_path.iterdir())[0]
     data_df = pd.read_csv(csv_file_path)
     
     # import to sql
@@ -29,8 +31,8 @@ def import_binding_sites():
 
 def import_genes():
     # open file
-    base_path = Path(__file__).parent
-    csv_file_path = base_path / 'human_genes_ensrelease99.csv'
+    folder_path = base_path /"genes"
+    csv_file_path = list(folder_path.iterdir())[0]
     data_df = pd.read_csv(csv_file_path)
     
     # import to sql
