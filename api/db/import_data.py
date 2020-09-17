@@ -1,7 +1,7 @@
 import pandas as pd
 from db.database import engine, db
 from pathlib import PurePosixPath, Path
-from db.models import Prejoin
+from db.models import Prejoin, Gene, BindingSite
 from models import PrejoinModel, BindingSiteModel, GeneModel
 from sqlalchemy import orm
 
@@ -58,6 +58,11 @@ def import_to_prejoin():
 def analyze():
     with engine.connect() as con:
         con.execute('ANALYZE;')
+
+def cleanup():
+    Gene.__table__.drop(engine)
+    BindingSite.__table__.drop(engine)
+
 
 
 
