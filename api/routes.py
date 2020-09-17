@@ -6,6 +6,8 @@ import csv
 from flask_csv import send_csv
 from api_helpers import get_params_from_request, get_query_from_params, Pagination
 
+ROWS_PER_PAGE = 20
+
 genomic = Blueprint('genomic', __name__)
 
 @genomic.route('/')
@@ -44,7 +46,7 @@ def search():
    query = get_query_from_params(params)
 
    #TODO dynamic results to fit the page? solve in css
-   pagination = Pagination(query, per_page=20)
+   pagination = Pagination(query, per_page=ROWS_PER_PAGE)
    try:
       serialized = pagination.get_page(params['page'])
    except:
@@ -61,9 +63,14 @@ def search():
    secondary_sort_asc_urls = {column: url_for('genomic.search', sort_by_secondary=f"{column}_asc", **args_without_secondary_sort) for column in header_keys}
    secondary_sort_desc_urls = {column: url_for('genomic.search', sort_by_secondary=f"{column}_desc", **args_without_secondary_sort) for column in header_keys}
 
+   print(len(serialized[0].values()))
+   print(pagination.total_pages)
    return render_template(
       'test.html',
       rows=serialized, 
+      rows_per_page=ROWS_PER_PAGE,
+      number_of_rows=len(serialized),
+      number_of_columns=len(serialized[0].values())-2 if serialized else 0,
       pages = pagination.total_pages,
       has_prev = pagination.has_prev,
       has_next = pagination.has_next,
