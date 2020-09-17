@@ -1,10 +1,11 @@
 import pandas as pd
 from db.database import engine, db
 from pathlib import PurePosixPath, Path
-from db.models import Prejoin, Gene, BindingSite
+from db.models import Prejoin, Gene, BindingSite, Protein
 from models import PrejoinModel, BindingSiteModel, GeneModel
 from sqlalchemy import orm
-
+import db.models
+    
 
 def import_proteins():
     # open file
@@ -64,6 +65,14 @@ def analyze():
 def cleanup():
     Gene.__table__.drop(engine)
     BindingSite.__table__.drop(engine)
+
+
+def recreate_all_tables():
+    Prejoin.__table__.drop(engine)
+    Protein.__table__.drop(engine)
+    db.models.Base.metadata.create_all(bind=db.models.engine)
+
+    
 
 
 
