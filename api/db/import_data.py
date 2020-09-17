@@ -36,24 +36,26 @@ def import_genes():
     data_df.to_sql('genes', index = False, con=engine, if_exists='append')
 
 def import_to_prejoin():
-    # TODO am i creating the session correctly?
     session = orm.scoped_session(orm.sessionmaker())(bind=engine)
 
     query = session.query(BindingSiteModel, GeneModel)
     #TODO >= vs >
     query = query.join(GeneModel, (GeneModel.strand == BindingSiteModel.strand) & (GeneModel.chr == BindingSiteModel.chr) & (BindingSiteModel.end > GeneModel.start) & (BindingSiteModel.start < GeneModel.end))
-    results = query.all()
-
     def get_row_from_res(result):
-        bs = result.BindingSiteModel
-        g = result.GeneModel
-        row = Prejoin(bs.id, bs.protein_name, bs.chr, bs.start, bs.end, bs.strand, bs.score, bs.note, g.id, g.symbol, g.start, g.end)
-        return row
-
-    rows = [get_row_from_res(res) for res in results]
-    for row in rows:
-        session.add(row)
-    session.commit()
+            bs = result.BindingSiteModel
+            g = result.GeneModel
+            row = Prejoin(bs.id, bs.protein_name, bs.chr, bs.start, bs.end, bs.strand, bs.score, bs.note, g.id, g.symbol, g.start, g.end)
+            return row
+    try:
+        results = query.all()
+        rows = [get_row_from_res(res) for res in results]
+        for row in rows:
+            session.add(row)
+        session.commit()
+    except:
+        session.rollback()
+    finally:
+        session.close()
 
 def analyze():
     with engine.connect() as con:
