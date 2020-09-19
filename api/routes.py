@@ -41,7 +41,6 @@ def search():
    params = get_params_from_request(request)
    query = get_query_from_params(params)
 
-   #TODO dynamic results to fit the page? solve in css
    pagination = Pagination(query, per_page=ROWS_PER_PAGE)
    try:
       serialized = pagination.get_page(params['page'])
@@ -63,8 +62,6 @@ def search():
       'index.html',
       rows=serialized, 
       rows_per_page=ROWS_PER_PAGE,
-      number_of_rows=len(serialized),
-      number_of_columns=len(serialized[0].values())-2 if serialized else 0,
       pages = pagination.total_pages,
       has_prev = pagination.has_prev,
       has_next = pagination.has_next,

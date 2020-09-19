@@ -130,10 +130,10 @@
                             {% endfor %}
                         </tr>
                         {% endfor %}
-                        {% if (rows_per_page - number_of_rows) > 0 and rows != 0%}
-                            {% for row in range(rows_per_page - number_of_rows) %}
+                        {% if (rows_per_page - rows|length) > 0 and rows != 0 %}
+                            {% for _ in range(rows_per_page - rows|length) %}
                                 <tr class="table-row">
-                                    {% for _ in range(number_of_columns) %}
+                                    {% for _ in range(rows[0]|length - 2) %}
                                         <td>{{""}}</td>
                                     {% endfor %}
                                 </tr>

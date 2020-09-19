@@ -28,7 +28,7 @@ class SearchForm(FlaskForm):
             ]
         )
 
-    score_min = FloatField('score min',
+    score_min = FloatField('min score',
             validators=[
                 Optional()
             ]
