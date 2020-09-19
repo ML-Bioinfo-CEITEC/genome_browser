@@ -7,6 +7,10 @@
             .table-row{
                 height: 32px;
             }
+            .menu-label{
+                margin-top: .5rem; 
+                margin-bottom: 0rem;
+            }
         </style>
     </head>
     <body>
@@ -15,63 +19,61 @@
                 <form method="POST" action="" nonvalidate>
                     {{ form.hidden_tag() }}
                     <div>
-                        {{ form.chromozom.label }}<br>
-                        {{ form.chromozom(value=params['chromozom'], class_='form-control col-form-label-sm') }}
+                        {{ form.chromozom.label(class="menu-label") }}<br>
+                        {{ form.chromozom(value=params['chromozom'], class_='form-control form-control-sm') }}
                         {% for error in form.chromozom.errors %}
                             <span style="color: red;">[{{ error }}]</span>
                         {% endfor %}
                     </div>
                     <div>
-                        {{ form.protein_name.label }}<br>
+                        {{ form.protein_name.label(class="menu-label") }}<br>
                         {{ form.protein_name(value=params['protein'], class_='form-control form-control-sm') }}
                         {% for error in form.protein_name.errors %}
                             <span style="color: red;">[{{ error }}]</span>
                         {% endfor %}
                     </div>
                     <div>
-                        {{ form.gene_id.label }}<br>
+                        {{ form.gene_id.label(class="menu-label") }}<br>
                         {{ form.gene_id(value=params['gene_id'], class_='form-control form-control-sm') }}
                         {% for error in form.gene_id.errors %}
                             <span style="color: red;">[{{ error }}]</span>
                         {% endfor %}
                     </div>
                     <div>
-                        {{ form.symbol.label }}<br>
+                        {{ form.symbol.label(class="menu-label")}}<br>
                         {{ form.symbol(value=params['symbol'], class_='form-control form-control-sm') }}
                         {% for error in form.symbol.errors %}
                             <span style="color: red;">[{{ error }}]</span>
                         {% endfor %}
                     </div>
-                    <div>
-                        {{ form.area_min.label }}<br>
-                        {{ form.area_min(value=params['area_min'], class_='form-control form-control-sm') }}
+                    <div style="display: inline-block; padding-bottom: 0.35rem;">
+                        <label class="menu-label">binding location</label><br>
+                        <nobr style="display: inline;"><span style="white-space: nowrap;"><label style="display: inline; padding-right: 5%;" for="area_min">min</label>{{ form.area_min(value=params['area_min'], class_='form-control form-control-sm', placeholder="-infinity", style="display: inline; width: 76%") }}</span></nobr>
                         {% for error in form.area_min.errors %}
                             <span style="color: red;">[{{ error }}]</span>
                         {% endfor %}
                     </div>
-                    <div>
-                        {{ form.area_max.label }}<br>
-                        {{ form.area_max(value=params['area_max'], class_='form-control form-control-sm') }}
+                    <div style="display: inline-block;">
+                        <nobr style="display: inline;"><span style="white-space: nowrap;"><label style="display: inline; padding-right: 3.5%;" for="area_max">max</label>{{ form.area_max(value=params['area_max'], class_='form-control form-control-sm', placeholder="infinity", style="display: inline; width: 76%") }}</span></nobr>
                         {% for error in form.area_max.errors %}
                             <span style="color: red;">[{{ error }}]</span>
                         {% endfor %}
                     </div>
-                    <div>
-                        {{ form.loc_min.label }}<br>
-                        {{ form.loc_min(value=params['loc_min'], class_='form-control form-control-sm') }}
+                    <div style="display: inline-block; padding-bottom: 0.35rem;">
+                        <label class="menu-label">gene location</label><br>
+                        <nobr style="display: inline;"><span style="white-space: nowrap;"><label style="display: inline; padding-right: 5%;" for="loc_min">min</label>{{ form.loc_min(value=params['loc_min'], class_='form-control form-control-sm', placeholder="-infinity", style="display: inline; width: 76%") }}</span></nobr>
                         {% for error in form.loc_min.errors %}
                             <span style="color: red;">[{{ error }}]</span>
                         {% endfor %}
                     </div>
-                    <div>
-                        {{ form.loc_max.label }}<br>
-                        {{ form.loc_max(value=params['loc_max'], class_='form-control form-control-sm') }}
+                    <div style="display: inline-block;">
+                        <nobr style="display: inline;"><span style="white-space: nowrap;"><label style="display: inline; padding-right: 3.5%;" for="loc_max">max</label>{{ form.loc_max(value=params['loc_max'], class_='form-control form-control-sm', placeholder="infinity", style="display: inline; width: 76%") }}</span></nobr>
                         {% for error in form.loc_max.errors %}
                             <span style="color: red;">[{{ error }}]</span>
                         {% endfor %}
                     </div>
                     <div>
-                        {{ form.score_min.label }}<br>
+                        {{ form.score_min.label(class="menu-label") }}<br>
                         {{ form.score_min(value=params['score_min'], class_='form-control form-control-sm') }}
                         {% for error in form.score_min.errors %}
                             <span style="color: red;">[{{ error }}]</span>

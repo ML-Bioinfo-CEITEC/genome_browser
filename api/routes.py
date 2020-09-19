@@ -63,8 +63,6 @@ def search():
    secondary_sort_asc_urls = {column: url_for('genomic.search', sort_by_secondary=f"{column}_asc", **args_without_secondary_sort) for column in header_keys}
    secondary_sort_desc_urls = {column: url_for('genomic.search', sort_by_secondary=f"{column}_desc", **args_without_secondary_sort) for column in header_keys}
 
-   print(len(serialized[0].values()))
-   print(pagination.total_pages)
    return render_template(
       'test.html',
       rows=serialized, 
