@@ -60,7 +60,7 @@ def search():
    secondary_sort_desc_urls = {column: url_for('genomic.search', sort_by_secondary=f"{column}_desc", **args_without_secondary_sort) for column in header_keys}
 
    return render_template(
-      'test.html',
+      'index.html',
       rows=serialized, 
       rows_per_page=ROWS_PER_PAGE,
       number_of_rows=len(serialized),
