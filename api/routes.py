@@ -10,10 +10,6 @@ ROWS_PER_PAGE = 20
 
 genomic = Blueprint('genomic', __name__)
 
-@genomic.route('/')
-def index():
-   return redirect("http://127.0.0.1:5000/search", code=302)
-
 @genomic.route('/download')
 def download():
    #TODO what if the data doesnt fit in RAM?
@@ -29,7 +25,7 @@ def download():
 
    return send_csv(results,"genomic_download.csv",results[0].keys())
 
-@genomic.route('/search', methods=["GET", "POST"])
+@genomic.route('/', methods=["GET", "POST"])
 #TODO verify attributed, server crashes if wrong arguments supplied, try testing it, wrong datatype etc...
 def search():
    searchform = SearchForm()
