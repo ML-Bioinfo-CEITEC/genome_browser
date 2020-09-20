@@ -1,9 +1,10 @@
 import pandas as pd
-from db.database import engine, db
 from pathlib import PurePosixPath, Path
-from db.models import Prejoin, Gene, BindingSite, Protein
-from models import PrejoinModel, BindingSiteModel, GeneModel
 from sqlalchemy import orm
+
+from db.database import engine, db
+from models import PrejoinModel, BindingSiteModel, GeneModel
+from db.models import Prejoin, Gene, BindingSite, Protein
 import db.models
 
 
