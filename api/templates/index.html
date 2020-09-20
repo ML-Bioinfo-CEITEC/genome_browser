@@ -86,7 +86,6 @@
             </div>
 
             <div style="margin-left: 12%;">
-                <!-- display: list-item; -->
                 <table class='table table-striped table-bordered table-sm' style="height: 80%; width: 98%; border: none; margin-bottom: 0.3rem;">
                     {% if rows %}
                     <thead class='thead-dark'>
@@ -109,12 +108,14 @@
                         {% for row in rows%}
                         <tr class="table-row" style="padding: 0rem; vertical-align: top;">
                             {% for key, value in row.items()%}
-                                <!-- TODO hardcoded protein_name and Protein url names - parametrize? -->
-                                <!-- and value is needed? -->
-                                {% if (key == "protein_name") and value%}
-                                <td><a href="{{row['Protein url']}}">{{value}}</a></td>
+                                <!-- hardcoded protein_name and Protein url names (defined in pagination) -->
+                                {% if (key == "protein_name")%}
+                                    {% if row['Protein url'] == None%}
+                                    <td style="white-space: nowrap;">{{value}}</td>
+                                    {%else%}
+                                    <td><a href="{{row['Protein url']}}">{{value}}</a></td>
+                                    {%endif%}
                                 {% elif key == "symbol"%}
-                                <!-- TODO give similar treatment to protein_url ? what if there is no url for it? -->
                                     {% if row['Symbol url'] == None%}
                                     <td style="white-space: nowrap;">{{value}}</td>
                                     {%else%}
@@ -151,10 +152,8 @@
                     {% else %}
                         <a href="{{ prev_page_url }}" type="button" class="btn btn-sm btn-primary disabled" aria-disabled="true" style="opacity: 0.3;">Previous</a>
                     {% endif %}
-                    <!-- <a href="{{ prev_page_url }}">PREVIOUS</a> -->
                     {% if has_next %} 
                         <a href="{{ next_page_url }}" type="button" class="btn btn-sm btn-primary">Next</a>
-                        <!-- <a href="{{ next_page_url }}">Next</a> -->
                     {% else %}
                         <a href="{{ next_page_url }}" type="button" class="btn btn-sm btn-primary disabled" aria-disabled="true" style="opacity: 0.3;">Next</a>
                     {% endif %} 
