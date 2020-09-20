@@ -10,6 +10,13 @@ ROWS_PER_PAGE = 20
 
 genomic = Blueprint('genomic', __name__)
 
+<<<<<<< HEAD
+=======
+# @genomic.route('/')
+# def index():
+#    return redirect("http://127.0.0.1:5000/search", code=302)
+
+>>>>>>> setup for gcp importing
 @genomic.route('/download')
 def download():
    #TODO what if the data doesnt fit in RAM?
@@ -62,6 +69,13 @@ def search():
       'index.html',
       rows=serialized, 
       rows_per_page=ROWS_PER_PAGE,
+<<<<<<< HEAD
+=======
+      #TODO delete this shit
+      number_of_rows=len(serialized),
+      number_of_columns=len(serialized[0].values())-2 if serialized else 0,
+      #########################
+>>>>>>> setup for gcp importing
       pages = pagination.total_pages,
       has_prev = pagination.has_prev,
       has_next = pagination.has_next,

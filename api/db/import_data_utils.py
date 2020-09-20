@@ -74,6 +74,9 @@ def recreate_all_tables():
     Protein.__table__.drop(engine)
     db.models.Base.metadata.create_all(bind=db.models.engine)
 
+def create_all_tables():
+    db.models.Base.metadata.create_all(bind=db.models.engine)
+
     
 
 
