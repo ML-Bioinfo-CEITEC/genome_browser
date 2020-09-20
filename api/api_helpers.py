@@ -155,3 +155,10 @@ class Pagination():
       pagination = all_results[self.per_page*(page - 1):self.per_page*page]
       serialized=[{**log.PrejoinModel.serialize(), "Protein url":log[1], "Symbol url":log[2]} for log in pagination]
       return serialized
+
+def get_params_from_form(searchform):
+      form_params = {}
+      for fieldname, value in searchform.data.items():
+         if value and fieldname!='submit' and fieldname!='csrf_token':
+            form_params[fieldname] = value
+      return form_params

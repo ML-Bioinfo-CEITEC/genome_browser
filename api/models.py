@@ -1,7 +1,6 @@
 from db.models import Protein, BindingSite, Gene, Prejoin
 from db.database import db
 
-#SQLAlchemy models converted to Flask-sqlalchemy models TODO: unite models? we need the query atribute https://docs.sqlalchemy.org/en/13/orm/query.html
 class ProteinModel(db.Model, Protein):
    def serialize(self):
       return {

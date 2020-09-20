@@ -7,7 +7,7 @@ from db.config import SQLALCHEMY_DATABASE_URL
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, 
-    echo=True, #False in production (verbose)
+    echo=False, 
 )
 Base = declarative_base()
 db = SQLAlchemy()

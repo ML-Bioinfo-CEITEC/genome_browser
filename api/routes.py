@@ -4,19 +4,12 @@ from db.database import db
 from forms import SearchForm
 import csv
 from flask_csv import send_csv
-from api_helpers import get_params_from_request, get_query_from_params, Pagination
+from api_helpers import get_params_from_request, get_query_from_params, Pagination, get_params_from_form
 
 ROWS_PER_PAGE = 20
 
 genomic = Blueprint('genomic', __name__)
 
-<<<<<<< HEAD
-=======
-# @genomic.route('/')
-# def index():
-#    return redirect("http://127.0.0.1:5000/search", code=302)
-
->>>>>>> setup for gcp importing
 @genomic.route('/download')
 def download():
    #TODO what if the data doesnt fit in RAM?
@@ -33,17 +26,11 @@ def download():
    return send_csv(results,"genomic_download.csv",results[0].keys())
 
 @genomic.route('/', methods=["GET", "POST"])
-#TODO verify attributed, server crashes if wrong arguments supplied, try testing it, wrong datatype etc...
 def search():
    searchform = SearchForm()
-   form_params = {}
-   for fieldname, value in searchform.data.items():
-      if value and fieldname!='submit' and fieldname!='csrf_token':
-         form_params[fieldname] = value
-
+   form_params = get_params_from_form(searchform)
    if(searchform.validate_on_submit()):
       return redirect(url_for('genomic.search',page=1,**form_params,))
-
 
    params = get_params_from_request(request)
    query = get_query_from_params(params)
@@ -69,13 +56,6 @@ def search():
       'index.html',
       rows=serialized, 
       rows_per_page=ROWS_PER_PAGE,
-<<<<<<< HEAD
-=======
-      #TODO delete this shit
-      number_of_rows=len(serialized),
-      number_of_columns=len(serialized[0].values())-2 if serialized else 0,
-      #########################
->>>>>>> setup for gcp importing
       pages = pagination.total_pages,
       has_prev = pagination.has_prev,
       has_next = pagination.has_next,
