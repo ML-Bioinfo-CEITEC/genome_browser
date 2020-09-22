@@ -1,4 +1,3 @@
-id,symbol,biotype,chr,start,end,strand
 ENSG00000000003,TSPAN6,protein_coding,X,100627108,100639991,-
 ENSG00000000005,TNMD,protein_coding,X,100584936,100599885,+
 ENSG00000000419,DPM1,protein_coding,20,50934867,50958555,-

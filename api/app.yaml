@@ -1,6 +1,3 @@
 runtime: python38
-# gunicorn is automatic, dont put in into requirements.txt https://cloud.google.com/appengine/docs/standard/python3/runtime#application_startup
-# entrypoint: gunicorn -b :5000 main:app
-# entrypoint: python main.py
 vpc_access_connector:
     name: ***REMOVED***

@@ -1,23 +1,30 @@
-from db.import_data_utils import import_binding_sites, import_proteins, import_genes, import_to_prejoin, analyze, cleanup, recreate_all_tables, create_all_tables
-from db.import_data_utils import generate_ids_for_bs, decapitate_proteins, decapitate_genes, import_to_prejoin_no_ram
+from db.import_data_utils import prepare_binding_sites, prepare_genes, prepare_proteins, create_prejoin, delete_all_rows
+from sqlalchemy import create_engine
+from db.config import SQLALCHEMY_DATABASE_URL_PUBLIC
 
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL_PUBLIC, 
+    echo=False, 
+)
 # only for db init
 # create_all_tables()
 
-# recreate_all_tables()
-# import_binding_sites()
-# import_proteins()
-# import_genes()
-# import_to_prejoin()
-# cleanup()
-
-#probably not needed, stats are there already (SELECT * from pg_stats;)
-# analyze()
+#TODO check after dataset change, probably not needed, stats are there already (SELECT * from pg_stats;)
+# analyze(engine)
 
 
-#######################
-# generate_ids_for_bs()
-# decapitate_proteins()
-# decapitate_genes()
-#######################
-# import_to_prejoin_no_ram()
+#Adjust csv files
+# prepare_binding_sites()
+# prepare_genes()
+# prepare_proteins()
+
+#Upload to buckets
+#Delete all records from all tables
+# delete_all_rows(engine)
+#Insert from buckets to db tables
+
+#Create prejoin
+# create_prejoin(engine)
+#TODO delete genes and binding sites to free up space?
+
+#delete csv files from buckets
