@@ -46,20 +46,20 @@ def cleanup():
 def create_all_tables():
     db.models.Base.metadata.create_all(bind=db.models.engine)
 
-def prepare_binding_sites():
+def prepare_binding_sites(csv_name):
     #TODO csv names
-    csv_file_path = base_path/"dummy_binding_sites_df.csv"
+    csv_file_path = base_path/csv_name
     data_df = pd.read_csv(csv_file_path)
     data_df.to_csv(base_path/"prepared"/'binding_sites_prepared.csv', index_label="id", index=True, header=False)
 
 #TODO loads the whole thing to ram 
-def prepare_proteins():
-    csv_file_path = base_path /"dummy_protein_df.csv"
+def prepare_proteins(csv_name):
+    csv_file_path = base_path /csv_name
     data_df = pd.read_csv(csv_file_path)
     data_df.to_csv(base_path/"prepared"/'proteins_prepared.csv', header=False, index=False)
 
-def prepare_genes():
-    csv_file_path = base_path /"human_genes_ensrelease99.csv"
+def prepare_genes(csv_name):
+    csv_file_path = base_path /csv_name
     data_df = pd.read_csv(csv_file_path)
     data_df.to_csv(base_path/"prepared"/'genes_prepared.csv', header=False, index=False)
 

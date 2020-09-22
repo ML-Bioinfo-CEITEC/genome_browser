@@ -12,15 +12,17 @@ engine = create_engine(
 #TODO check after dataset change, probably not needed, stats are there already (SELECT * from pg_stats;)
 # analyze(engine)
 
+#create csv_files folder and put all 3 csv files into it
 
 #Adjust csv files
-# prepare_binding_sites()
-# prepare_genes()
-# prepare_proteins()
+prepare_binding_sites("dummy_binding_sites_df.csv")
+prepare_genes("human_genes_ensrelease99.csv")
+prepare_proteins("dummy_protein_df.csv")
 
-#Upload to buckets
 #Delete all records from all tables
 # delete_all_rows(engine)
+
+#Upload to buckets
 #Insert from buckets to db tables
 
 #Create prejoin
