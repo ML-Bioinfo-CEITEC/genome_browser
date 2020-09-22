@@ -33,7 +33,7 @@ def delete_all_rows(engine):
     finally:
         session.close()
 
-def analyze():
+def analyze(engine):
     with engine.connect() as con:
         con.execute('ANALYZE;')
 
@@ -47,6 +47,7 @@ def create_all_tables():
     db.models.Base.metadata.create_all(bind=db.models.engine)
 
 def prepare_binding_sites():
+    #TODO csv names
     csv_file_path = base_path/"dummy_binding_sites_df.csv"
     data_df = pd.read_csv(csv_file_path)
     data_df.to_csv(base_path/"prepared"/'binding_sites_prepared.csv', index_label="id", index=True, header=False)
