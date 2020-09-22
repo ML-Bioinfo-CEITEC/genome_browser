@@ -1,5 +1,5 @@
 from sqlalchemy.engine import url
-from secrets import SECRET_KEY, POSTGRES
+from db.secrets import SECRET_KEY, POSTGRES
 
 SQLALCHEMY_DATABASE_URL = url.URL(
         drivername="postgres",

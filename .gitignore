@@ -141,4 +141,5 @@ cython_debug/
 # Custom
 # -------------
 api/db/secrets.py
-api/db/csv_files
+api/db/csv_files/*.csv
+api/db/csv_files/prepared/*.csv
