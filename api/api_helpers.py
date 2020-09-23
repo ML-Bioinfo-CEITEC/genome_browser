@@ -146,8 +146,18 @@ class Pagination():
       self.per_page = per_page
       self.query = query
 
+   def get_page_fast(self, page):
+      self.total_pages = int(math.ceil(self.query.count()/self.per_page))
+      self.has_prev = page > 1
+      self.has_next = page < self.total_pages   
+      pagination = self.query.limit(self.per_page).offset((page*self.per_page)-self.per_page).all()
+      serialized=[{**log.PrejoinModel.serialize(), "Protein url":log[1], "Symbol url":log[2]} for log in pagination]
+      return serialized
+
+   #TODO obsolete
    def get_page(self, page):
       all_results = self.query.all()
+
       self.total_pages = int(math.ceil(len(all_results)/self.per_page))
       self.has_prev = page > 1
       self.has_next = page < self.total_pages   

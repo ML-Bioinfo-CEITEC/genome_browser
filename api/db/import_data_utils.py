@@ -47,7 +47,6 @@ def create_all_tables():
     db.models.Base.metadata.create_all(bind=db.models.engine)
 
 def prepare_binding_sites(csv_name):
-    #TODO csv names
     csv_file_path = base_path/csv_name
     data_df = pd.read_csv(csv_file_path)
     data_df.to_csv(base_path/"prepared"/'binding_sites_prepared.csv', index_label="id", index=True, header=False)

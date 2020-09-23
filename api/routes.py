@@ -37,7 +37,7 @@ def search():
 
    pagination = Pagination(query, per_page=ROWS_PER_PAGE)
    try:
-      serialized = pagination.get_page(params['page'])
+      serialized = pagination.get_page_fast(params['page'])
    except:
       return '500 Internal Server Error',500
    
