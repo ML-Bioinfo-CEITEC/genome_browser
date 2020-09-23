@@ -143,3 +143,4 @@ cython_debug/
 api/db/secrets.py
 api/db/csv_files/*.csv
 api/db/csv_files/prepared/*.csv
+api/app.yaml

@@ -1,7 +1,0 @@
-basic_scaling:
-  idle_timeout: 5m
-  max_instances: 10
-instance_class: B2
-runtime: python38
-vpc_access_connector:
-  name: ***REMOVED***

@@ -1,17 +1,5 @@
 import yaml
-
-data = dict(
-    runtime = 'python38',
-    instance_class = 'B2',
-    
-    basic_scaling = dict(
-        max_instances = 10,
-        idle_timeout = '5m',
-    ),
-    vpc_access_connector = dict(
-        name = "***REMOVED***"
-    )
-)
+from secrets import app_yaml_dict
 
 with open('app.yaml', 'w') as outfile:
-    yaml.dump(data, outfile, default_flow_style=False)
+    yaml.dump(app_yaml_dict, outfile, default_flow_style=False)
