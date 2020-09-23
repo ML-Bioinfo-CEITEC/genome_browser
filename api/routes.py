@@ -12,7 +12,7 @@ genomic = Blueprint('genomic', __name__)
 
 @genomic.route('/download')
 def download():
-   #TODO what if the data doesnt fit in RAM?
+   #TODO what if the data doesnt fit in RAM? change instance_class in yaml https://cloud.google.com/appengine/docs/standard#instance_classes
    params = get_params_from_request(request)
    query = get_query_from_params(params)
    try:
