@@ -1,8 +1,7 @@
-runtime: python38
-instance_class: B2
 basic_scaling:
-    max_instances: 10
-    idle_timeout: 5m
-#TODO secret? gitignore
+  idle_timeout: 5m
+  max_instances: 10
+instance_class: B2
+runtime: python38
 vpc_access_connector:
-    name: ***REMOVED***
+  name: ***REMOVED***
