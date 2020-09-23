@@ -15,7 +15,9 @@ def create_prejoin(engine):
     try:
         session.execute(sql)
         session.commit()
-    except:
+    except  Exception as e:
+        print(e)
+        print("ROLLBACK")
         session.rollback()
     finally:
         session.close()
@@ -29,6 +31,7 @@ def delete_all_rows(engine):
         session.commit()
     except Exception as e:
         print(e)
+        print("ROLLBACK")
         session.rollback()
     finally:
         session.close()

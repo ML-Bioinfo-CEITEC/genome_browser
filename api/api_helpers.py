@@ -1,6 +1,7 @@
 from models import PrejoinModel, ProteinModel
 import math
 from sqlalchemy.orm import aliased
+from sqlalchemy import text
 
 def get_params_from_request(request):
    #get parameters from url
@@ -83,8 +84,10 @@ def get_query_from_params(params):
    if(sortby == 'protein_name_asc'): query = query.order_by(PrejoinModel.protein_name.asc())
    if(sortby == 'protein_name_desc'): query = query.order_by(PrejoinModel.protein_name.desc())
 
-   if(sortby == 'chr_asc'): query = query.order_by(PrejoinModel.chr.asc())
-   if(sortby == 'chr_desc'): query = query.order_by(PrejoinModel.chr.desc())
+   if(sortby == 'chr_asc'): 
+      query = query.order_by(text("(substring(chr, '^[0-9]+')::int, substring(chr, '[^0-9]*$')) ASC"))
+   if(sortby == 'chr_desc'): 
+      query = query.order_by(text("(substring(chr, '^[0-9]+')::int, substring(chr, '[^0-9]*$')) DESC"))
 
    if(sortby == 'start_asc'): query = query.order_by(PrejoinModel.bs_start.asc())
    if(sortby == 'start_desc'): query = query.order_by(PrejoinModel.bs_start.desc())
@@ -115,8 +118,10 @@ def get_query_from_params(params):
       if(sortby_secondary == 'protein_name_asc'): query = query.order_by(PrejoinModel.protein_name.asc())
       if(sortby_secondary == 'protein_name_desc'): query = query.order_by(PrejoinModel.protein_name.desc())
 
-      if(sortby_secondary == 'chr_asc'): query = query.order_by(PrejoinModel.chr.asc())
-      if(sortby_secondary == 'chr_desc'): query = query.order_by(PrejoinModel.chr.desc())
+      if(sortby_secondary == 'chr_asc'): 
+         query = query.order_by(text("(substring(chr, '^[0-9]+')::int, substring(chr, '[^0-9]*$')) ASC"))
+      if(sortby_secondary == 'chr_desc'): 
+         query = query.order_by(text("(substring(chr, '^[0-9]+')::int, substring(chr, '[^0-9]*$')) DESC"))
 
       if(sortby_secondary == 'start_asc'): query = query.order_by(PrejoinModel.bs_start.asc())
       if(sortby_secondary == 'start_desc'): query = query.order_by(PrejoinModel.bs_start.desc())
@@ -141,6 +146,7 @@ def get_query_from_params(params):
 
    return query
 
+#TODO use sqlalchemy pagination since the order is broken anyways?
 class Pagination():
    def __init__(self, query, per_page):
       self.per_page = per_page
@@ -150,7 +156,8 @@ class Pagination():
       self.total_pages = int(math.ceil(self.query.count()/self.per_page))
       self.has_prev = page > 1
       self.has_next = page < self.total_pages   
-      pagination = self.query.limit(self.per_page).offset((page*self.per_page)-self.per_page).all()
+      pagination = self.query.limit(self.per_page).offset((page*self.per_page)-self.per_page)
+      pagination = pagination.all()
       serialized=[{**log.PrejoinModel.serialize(), "Protein url":log[1], "Symbol url":log[2]} for log in pagination]
       return serialized
 
