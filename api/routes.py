@@ -5,8 +5,6 @@ from forms import SearchForm
 import csv
 from flask_csv import send_csv
 from api_helpers import get_params_from_request, get_query_from_params, get_params_from_form
-import traceback
-import sys
 
 ROWS_PER_PAGE = 20
 
@@ -38,11 +36,9 @@ def search():
    query = get_query_from_params(params)
 
    try:
-      sys.stderr.write("Test for logging [DELETE THIS]")
       pagination = query.paginate(page=params['page'], per_page=ROWS_PER_PAGE)
       serialized=[{**log.PrejoinModel.serialize(), "Protein url":log[1], "Symbol url":log[2]} for log in pagination.items]
    except:
-      sys.stderr.write(traceback.print_exc())
       return '500 Internal Server Error',500
 
    header_keys = serialized[0].keys() if serialized else {}
