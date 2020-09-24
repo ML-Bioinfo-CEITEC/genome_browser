@@ -146,33 +146,6 @@ def get_query_from_params(params):
 
    return query
 
-#TODO use sqlalchemy pagination since the order is broken anyways?
-class Pagination():
-   def __init__(self, query, per_page):
-      self.per_page = per_page
-      self.query = query
-
-   def get_page_fast(self, page):
-      self.total_pages = int(math.ceil(self.query.count()/self.per_page))
-      self.has_prev = page > 1
-      self.has_next = page < self.total_pages   
-      pagination = self.query.limit(self.per_page).offset((page*self.per_page)-self.per_page)
-      pagination = pagination.all()
-      serialized=[{**log.PrejoinModel.serialize(), "Protein url":log[1], "Symbol url":log[2]} for log in pagination]
-      return serialized
-
-   #TODO obsolete
-   def get_page(self, page):
-      all_results = self.query.all()
-
-      self.total_pages = int(math.ceil(len(all_results)/self.per_page))
-      self.has_prev = page > 1
-      self.has_next = page < self.total_pages   
-
-      pagination = all_results[self.per_page*(page - 1):self.per_page*page]
-      serialized=[{**log.PrejoinModel.serialize(), "Protein url":log[1], "Symbol url":log[2]} for log in pagination]
-      return serialized
-
 def get_params_from_form(searchform):
       form_params = {}
       for fieldname, value in searchform.data.items():
