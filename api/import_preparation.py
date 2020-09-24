@@ -1,9 +1,9 @@
 from db.import_data_utils import prepare_binding_sites, prepare_genes, prepare_proteins
 from sqlalchemy import create_engine
-from db.config import SQLALCHEMY_DATABASE_URL_PUBLIC
+from db.config import SQLALCHEMY_DATABASE_URL_LOCAL
 
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL_PUBLIC, 
+    SQLALCHEMY_DATABASE_URL_LOCAL, 
     echo=False, 
 )
 
@@ -11,6 +11,7 @@ engine = create_engine(
 binding_sites_csv_name = "dummy_binding_sites_df.csv"
 genes_csv_name = "human_genes_ensrelease99.csv"
 proteins_csv_name = "dorina_clipseq_proteins_df.csv"
+
 
 #Adjust csv files
 prepare_binding_sites(binding_sites_csv_name)
