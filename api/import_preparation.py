@@ -1,4 +1,4 @@
-from db.import_data_utils import prepare_binding_sites, prepare_genes, prepare_proteins
+from db.import_data_utils import prepare_binding_sites, prepare_genes, prepare_proteins, delete_all_rows
 from sqlalchemy import create_engine
 from db.config import SQLALCHEMY_DATABASE_URL_LOCAL
 
