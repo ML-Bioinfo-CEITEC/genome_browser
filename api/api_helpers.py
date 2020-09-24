@@ -1,7 +1,7 @@
 from models import PrejoinModel, ProteinModel
 import math
 from sqlalchemy.orm import aliased
-from sqlalchemy import text
+from sqlalchemy import text, func
 
 def get_params_from_request(request):
    #get parameters from url
@@ -50,15 +50,15 @@ def get_query_from_params(params):
 
    #building the filters from parameters
    filters = []
-   if(protein): filters.append(PrejoinModel.protein_name == protein)
-   if(symbol): filters.append(PrejoinModel.symbol == symbol)
-   if(gene_id): filters.append(PrejoinModel.gene_id == gene_id)
+   if(protein): filters.append(func.lower(PrejoinModel.protein_name) == func.lower(protein))
+   if(symbol): filters.append(func.lower(PrejoinModel.symbol) == func.lower(symbol))
+   if(gene_id): filters.append(func.lower(PrejoinModel.gene_id) == func.lower(gene_id))
    
    if(loc_min): filters.append(PrejoinModel.gene_start >= loc_min)
    if(loc_max): filters.append(PrejoinModel.gene_end <= loc_max)
 
    #checks if not None and if not empty string
-   if(chromozom): filters.append(PrejoinModel.chr == chromozom)
+   if(chromozom): filters.append(func.lower(PrejoinModel.chr) == func.lower(chromozom))
    if(area_min): filters.append(PrejoinModel.bs_start >= area_min)
    if(area_max): filters.append(PrejoinModel.bs_end <= area_max)
    if(score_min): filters.append(PrejoinModel.score >= score_min)
