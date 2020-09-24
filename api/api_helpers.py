@@ -14,8 +14,8 @@ def get_params_from_request(request):
    #genomic location (genes start/end)
    params["loc_min"] = request.args.get('loc_min', type=int, default="")
    params["loc_max"] = request.args.get('loc_max', type=int, default="")
-   #chromozom
-   params["chromozom"] = request.args.get('chromozom', type=str, default="")
+   #chromosome
+   params["chromosome"] = request.args.get('chromosome', type=str, default="")
    #gene area (binding site start/end ?)
    params["area_min"] = request.args.get('area_min', type=int, default="")
    params["area_max"] = request.args.get('area_max', type=int, default="")
@@ -41,7 +41,7 @@ def get_query_from_params(params):
    gene_id = params['gene_id']
    loc_min = params['loc_min']
    loc_max = params['loc_max']
-   chromozom = params['chromozom']
+   chromosome = params['chromosome']
    area_min = params['area_min']
    area_max = params['area_max']
    score_min = params['score_min']
@@ -58,7 +58,7 @@ def get_query_from_params(params):
    if(loc_max): filters.append(PrejoinModel.gene_end <= loc_max)
 
    #checks if not None and if not empty string
-   if(chromozom): filters.append(func.lower(PrejoinModel.chr) == func.lower(chromozom))
+   if(chromosome): filters.append(func.lower(PrejoinModel.chr) == func.lower(chromosome))
    if(area_min): filters.append(PrejoinModel.bs_start >= area_min)
    if(area_max): filters.append(PrejoinModel.bs_end <= area_max)
    if(score_min): filters.append(PrejoinModel.score >= score_min)

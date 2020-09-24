@@ -19,9 +19,9 @@
                 <form method="POST" action="" nonvalidate>
                     {{ form.hidden_tag() }}
                     <div>
-                        {{ form.chromozom.label(class="menu-label") }}<br>
-                        {{ form.chromozom(value=params['chromozom'], class_='form-control form-control-sm') }}
-                        {% for error in form.chromozom.errors %}
+                        {{ form.chromosome.label(class="menu-label") }}<br>
+                        {{ form.chromosome(value=params['chromosome'], class_='form-control form-control-sm') }}
+                        {% for error in form.chromosome.errors %}
                             <span style="color: red;">[{{ error }}]</span>
                         {% endfor %}
                     </div>

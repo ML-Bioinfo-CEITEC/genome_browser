@@ -3,7 +3,7 @@ from wtforms import StringField, SubmitField, RadioField, IntegerField, SelectFi
 from wtforms.validators import DataRequired, Optional
 
 class SearchForm(FlaskForm):
-    chromozom = StringField('chromozom')
+    chromosome = StringField('chromosome')
     protein_name = StringField('protein name')
     symbol = StringField('gene symbol')
     gene_id = StringField('gene id')
