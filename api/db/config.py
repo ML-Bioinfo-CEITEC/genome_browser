@@ -1,7 +1,9 @@
 from sqlalchemy.engine import url
 from db.secrets import SECRET_KEY, POSTGRES
 
-SQLALCHEMY_DATABASE_URL = url.URL(
+deploy_mode = True
+
+SQLALCHEMY_DATABASE_URL_APPENGINE = url.URL(
         drivername="postgres",
         username=POSTGRES['user'], 
         password=POSTGRES['pw'],  
@@ -10,7 +12,7 @@ SQLALCHEMY_DATABASE_URL = url.URL(
         database=POSTGRES['db'] 
     )
     
-SQLALCHEMY_DATABASE_URL_PUBLIC = url.URL(
+SQLALCHEMY_DATABASE_URL_LOCAL = url.URL(
         drivername="postgres",
         username=POSTGRES['user'], 
         password=POSTGRES['pw'],  
@@ -18,5 +20,11 @@ SQLALCHEMY_DATABASE_URL_PUBLIC = url.URL(
         port=POSTGRES['port'], 
         database=POSTGRES['db'] 
     )
-# SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL_PUBLIC
+
+
+if deploy_mode:
+    SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL_APPENGINE
+else:
+    SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL_LOCAL
+    
 

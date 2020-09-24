@@ -77,6 +77,7 @@ def get_query_from_params(params):
 
    #sorting
    #TODO make another argument direction (desc, asc), instead of hardcoding every combination
+   #TODO rewrite to switch or dictionary getting
    #i display only 3 decimals for score - if i sort by score primarily and secondarily by something else, the table looks weird, because the full score isnt displayed
    if(sortby == 'score_asc'): query = query.order_by(PrejoinModel.score.asc())
    if(sortby == 'score_desc'): query = query.order_by(PrejoinModel.score.desc())
