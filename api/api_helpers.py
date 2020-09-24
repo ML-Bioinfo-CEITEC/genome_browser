@@ -19,9 +19,8 @@ def get_params_from_request(request):
    #gene area (binding site start/end ?)
    params["area_min"] = request.args.get('area_min', type=int, default="")
    params["area_max"] = request.args.get('area_max', type=int, default="")
-   #score ?
+   #score
    params["score_min"] = request.args.get('score_min', type=float, default="")
-   # score_max = request.args.get('score_max', type=float)
 
    #control elements
    params["page"] = request.args.get('page', type=int, default = 1)
@@ -34,6 +33,30 @@ def get_params_from_request(request):
       params["sortby_secondary"] = None
 
    return params
+
+sort_dict = {
+      'score_asc': PrejoinModel.score.asc(),
+      'score_desc': PrejoinModel.score.desc(),
+      'protein_name_asc': PrejoinModel.protein_name.asc(),
+      'protein_name_desc': PrejoinModel.protein_name.desc(),
+      'chr_asc': text("(substring(chr, '^[0-9]+')::int, substring(chr, '[^0-9]*$')) ASC"),
+      'chr_desc': text("(substring(chr, '^[0-9]+')::int, substring(chr, '[^0-9]*$')) DESC"),
+      'start_asc': PrejoinModel.bs_start.asc(),
+      'start_desc': PrejoinModel.bs_start.desc(),
+      'end_asc': PrejoinModel.bs_end.asc(),
+      'end_desc': PrejoinModel.bs_end.desc(),
+      'strand_asc': PrejoinModel.strand.asc(),
+      'strand_desc': PrejoinModel.strand.desc(),
+      'symbol_asc': PrejoinModel.symbol.asc(),
+      'symbol_desc': PrejoinModel.symbol.desc(),
+      'gene_start_asc': PrejoinModel.gene_start.asc(),
+      'gene_start_desc': PrejoinModel.gene_start.desc(),
+      'gene_end_asc': PrejoinModel.gene_end.asc(),
+      'gene_end_desc': PrejoinModel.gene_end.desc(),
+      'id_asc': PrejoinModel.bs_id.asc(),
+      'id_desc': PrejoinModel.bs_id.desc(),
+
+   }
 
 def get_query_from_params(params):
    protein = params['protein']
@@ -63,7 +86,7 @@ def get_query_from_params(params):
    if(area_max): filters.append(PrejoinModel.bs_end <= area_max)
    if(score_min): filters.append(PrejoinModel.score >= score_min)
 
-   #PREJOINED QUERY
+   #get protein and symbol url's
    p1 = aliased(ProteinModel)
    p2 = aliased(ProteinModel)
 
@@ -76,74 +99,10 @@ def get_query_from_params(params):
    query = query.filter(*filters)
 
    #sorting
-   #TODO make another argument direction (desc, asc), instead of hardcoding every combination
-   #TODO rewrite to switch or dictionary getting
    #i display only 3 decimals for score - if i sort by score primarily and secondarily by something else, the table looks weird, because the full score isnt displayed
-   if(sortby == 'score_asc'): query = query.order_by(PrejoinModel.score.asc())
-   if(sortby == 'score_desc'): query = query.order_by(PrejoinModel.score.desc())
-
-   if(sortby == 'protein_name_asc'): query = query.order_by(PrejoinModel.protein_name.asc())
-   if(sortby == 'protein_name_desc'): query = query.order_by(PrejoinModel.protein_name.desc())
-
-   if(sortby == 'chr_asc'): 
-      query = query.order_by(text("(substring(chr, '^[0-9]+')::int, substring(chr, '[^0-9]*$')) ASC"))
-   if(sortby == 'chr_desc'): 
-      query = query.order_by(text("(substring(chr, '^[0-9]+')::int, substring(chr, '[^0-9]*$')) DESC"))
-
-   if(sortby == 'start_asc'): query = query.order_by(PrejoinModel.bs_start.asc())
-   if(sortby == 'start_desc'): query = query.order_by(PrejoinModel.bs_start.desc())
-
-   if(sortby == 'end_asc'): query = query.order_by(PrejoinModel.bs_end.asc())
-   if(sortby == 'end_desc'): query = query.order_by(PrejoinModel.bs_end.desc())
-
-   if(sortby == 'strand_asc'): query = query.order_by(PrejoinModel.strand.asc())
-   if(sortby == 'strand_desc'): query = query.order_by(PrejoinModel.strand.desc())
-  
-   if(sortby == 'symbol_asc'): query = query.order_by(PrejoinModel.symbol.asc())
-   if(sortby == 'symbol_desc'): query = query.order_by(PrejoinModel.symbol.desc())
-
-   if(sortby == 'gene_start_asc'): query = query.order_by(PrejoinModel.gene_start.asc())
-   if(sortby == 'gene_start_desc'): query = query.order_by(PrejoinModel.gene_start.desc())
-
-   if(sortby == 'gene_end_asc'): query = query.order_by(PrejoinModel.gene_end.asc())
-   if(sortby == 'gene_end_desc'): query = query.order_by(PrejoinModel.gene_end.desc())
-
-
-   if(sortby == 'id_asc'): query = query.order_by(PrejoinModel.bs_id.asc())
-   if(sortby == 'id_desc'): query = query.order_by(PrejoinModel.bs_id.desc())
-
+   query = query.order_by(sort_dict[sortby])
    if(sortby_secondary):
-      if(sortby_secondary == 'score_asc'): query = query.order_by(PrejoinModel.score.asc())
-      if(sortby_secondary == 'score_desc'): query = query.order_by(PrejoinModel.score.desc())
-
-      if(sortby_secondary == 'protein_name_asc'): query = query.order_by(PrejoinModel.protein_name.asc())
-      if(sortby_secondary == 'protein_name_desc'): query = query.order_by(PrejoinModel.protein_name.desc())
-
-      if(sortby_secondary == 'chr_asc'): 
-         query = query.order_by(text("(substring(chr, '^[0-9]+')::int, substring(chr, '[^0-9]*$')) ASC"))
-      if(sortby_secondary == 'chr_desc'): 
-         query = query.order_by(text("(substring(chr, '^[0-9]+')::int, substring(chr, '[^0-9]*$')) DESC"))
-
-      if(sortby_secondary == 'start_asc'): query = query.order_by(PrejoinModel.bs_start.asc())
-      if(sortby_secondary == 'start_desc'): query = query.order_by(PrejoinModel.bs_start.desc())
-
-      if(sortby_secondary == 'end_asc'): query = query.order_by(PrejoinModel.bs_end.asc())
-      if(sortby_secondary == 'end_desc'): query = query.order_by(PrejoinModel.bs_end.desc())
-
-      if(sortby_secondary == 'strand_asc'): query = query.order_by(PrejoinModel.strand.asc())
-      if(sortby_secondary == 'strand_desc'): query = query.order_by(PrejoinModel.strand.desc())
-   
-      if(sortby_secondary == 'symbol_asc'): query = query.order_by(PrejoinModel.symbol.asc())
-      if(sortby_secondary == 'symbol_desc'): query = query.order_by(PrejoinModel.symbol.desc())
-
-      if(sortby_secondary == 'gene_start_asc'): query = query.order_by(PrejoinModel.gene_start.asc())
-      if(sortby_secondary == 'gene_start_desc'): query = query.order_by(PrejoinModel.gene_start.desc())
-
-      if(sortby_secondary == 'gene_end_asc'): query = query.order_by(PrejoinModel.gene_end.asc())
-      if(sortby_secondary == 'gene_end_desc'): query = query.order_by(PrejoinModel.gene_end.desc())
-
-      if(sortby_secondary == 'id_asc'): query = query.order_by(PrejoinModel.bs_id.asc())
-      if(sortby_secondary == 'id_desc'): query = query.order_by(PrejoinModel.bs_id.desc())
+      query = query.order_by(sort_dict[sortby_secondary])
 
    return query
 
