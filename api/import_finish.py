@@ -6,14 +6,7 @@ engine = create_engine(
     SQLALCHEMY_DATABASE_URL_PUBLIC, 
     echo=False, 
 )
-# only for db init
-# create_all_tables()
 
-#TODO check after dataset change, probably not needed, stats are there already (SELECT * from pg_stats;)
-# analyze(engine)
-
-#Create prejoin
+#Create prejoin table
 create_prejoin(engine)
-#TODO delete genes and binding sites to free up space?
-
-#delete csv files from buckets
+#TODO possible upgrade: delete genes and binding sites to free up space

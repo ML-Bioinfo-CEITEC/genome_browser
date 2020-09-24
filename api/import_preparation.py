@@ -7,7 +7,7 @@ engine = create_engine(
     echo=False, 
 )
 
-### YOUR CSV FILE NAMES GO HERE ###
+### YOUR CSV FILE NAMES FROM api/db/csv_files GO HERE ###
 binding_sites_csv_name = "dummy_binding_sites_df.csv"
 genes_csv_name = "human_genes_ensrelease99.csv"
 proteins_csv_name = "dorina_clipseq_proteins_df.csv"
@@ -18,8 +18,5 @@ prepare_genes(genes_csv_name)
 prepare_proteins(proteins_csv_name)
 
 #Delete all records from all tables
-#TODO staging db so there is no downtime?
+#TODO possible upgrade: staging db so there is no downtime
 delete_all_rows(engine)
-
-#Upload to buckets
-#Insert from buckets to db tables
