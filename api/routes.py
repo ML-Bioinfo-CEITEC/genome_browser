@@ -57,6 +57,7 @@ def search():
       rows=serialized, 
       rows_per_page=ROWS_PER_PAGE,
       pages = pagination.pages,
+      number_of_results = query.count(),
       has_prev = pagination.has_prev,
       has_next = pagination.has_next,
       prev_page_url = url_for('genomic.search', page=params['page']-1, **args_without_page),

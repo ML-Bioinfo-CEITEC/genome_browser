@@ -12,7 +12,9 @@
         {% endif %} 
     
         {% if rows %}
-            <a href="{{download_url}}" type="button" class="btn btn-sm btn-primary" style="float: right; margin-right: 2.5%;">Download</a>
+            <a href="{{download_url}}" type="button" class="btn btn-sm btn-primary" style="float: right; margin-right: 2.5%; ">Download</a>
+            {% set results_count_text = 'result found' if number_of_results == 1 else 'results found' %}
+            <span style="float: right; margin-right: 1%; margin-top: 0.25%;">{{number_of_results}} {{results_count_text}}</span>
         {% endif %}
         <div>Page {{params['page']}} / {{pages}}</div>
     {% else %}
