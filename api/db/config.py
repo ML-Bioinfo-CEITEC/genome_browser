@@ -1,7 +1,7 @@
 from sqlalchemy.engine import url
 from db.secrets import SECRET_KEY, POSTGRES
 
-deploy_mode = False
+deploy_mode = True
 
 SQLALCHEMY_DATABASE_URL_APPENGINE = url.URL(
         drivername="postgres",
