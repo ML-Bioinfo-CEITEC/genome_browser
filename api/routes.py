@@ -15,10 +15,7 @@ def download():
    #TODO possible upgrade: what if the data doesnt fit in RAM? change instance_class in yaml https://cloud.google.com/appengine/docs/standard#instance_classes
    params = get_params_from_request(request)
    query = get_query_from_params(params)
-   try:
-      result = query.all()
-   except:
-      return '500 Internal Server Error', 500
+   result = query.all()
    if(len(result) == 0):
       return "No results"
    results = [{**log.PrejoinModel.serialize(), "Protein url":log[1], "Symbol url":log[2],} for log in result]
@@ -34,12 +31,9 @@ def search():
 
    params = get_params_from_request(request)
    query = get_query_from_params(params)
-
-   try:
-      pagination = query.paginate(page=params['page'], per_page=ROWS_PER_PAGE)
-      serialized=[{**log.PrejoinModel.serialize(), "Protein url":log[1], "Symbol url":log[2]} for log in pagination.items]
-   except:
-      return '500 Internal Server Error',500
+   
+   pagination = query.paginate(page=params['page'], per_page=ROWS_PER_PAGE)
+   serialized=[{**log.PrejoinModel.serialize(), "Protein url":log[1], "Symbol url":log[2]} for log in pagination.items]
 
    header_keys = serialized[0].keys() if serialized else {}
 
