@@ -1,0 +1,59 @@
+<div style="margin-left: 12%;">
+    <table class='table table-striped table-bordered table-sm' style="height: 80%; width: 98%; border: none; margin-bottom: 0.3rem;">
+        {% if rows %}
+        <thead class='thead-dark'>
+            <tr style="text-align: center;">
+                {% for key, value in rows[0].items()%}
+                    {% if key != 'Protein url' and key!='Symbol url'%}
+                    <th>{{key}} 
+                        <div style="white-space: nowrap;">
+                            <a href="{{primary_sort_asc_urls[key]}}">↥</a> 
+                            <a href="{{primary_sort_desc_urls[key]}}">↧</a> 
+                            <a href="{{secondary_sort_asc_urls[key]}}">↟</a> 
+                            <a href="{{secondary_sort_desc_urls[key]}}">↡</a>
+                        </div>
+                    </th>
+                    {%endif%}
+                {% endfor %}
+            </tr>  
+        </thead> 
+        <tbody>
+            {% for row in rows%}
+            <tr class="table-row" style="padding: 0rem; vertical-align: top;">
+                {% for key, value in row.items()%}
+                    <!-- hardcoded protein_name and Protein url names (defined in pagination) -->
+                    {% if (key == "protein_name")%}
+                        {% if row['Protein url'] == None%}
+                        <td style="white-space: nowrap;">{{value}}</td>
+                        {%else%}
+                        <td><a href="{{row['Protein url']}}">{{value}}</a></td>
+                        {%endif%}
+                    {% elif key == "symbol"%}
+                        {% if row['Symbol url'] == None%}
+                        <td style="white-space: nowrap;">{{value}}</td>
+                        {%else%}
+                        <td><a href="{{row['Symbol url']}}">{{value}}</a></td>
+                        {%endif%}
+                    {%elif key == 'score' and value%}
+                    <td>{{value|round(3, 'floor')}}</td>
+                    {%elif key == 'note' and value == None%}
+                    <td>{{""}}</td>
+                    {% elif key!= 'Protein url' and key!= 'Symbol url'%}
+                    <td>{{value}}</td>
+                    {%endif%}
+                {% endfor %}
+            </tr>
+            {% endfor %}
+            {% if (rows_per_page - rows|length) > 0 and rows != 0 %}
+                {% for _ in range(rows_per_page - rows|length) %}
+                    <tr class="table-row">
+                        {% for _ in range(rows[0]|length - 2) %}
+                            <td>{{""}}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            {% endif %}
+        </tbody>
+        {% endif %}
+    </table>
+</div>

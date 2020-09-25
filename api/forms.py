@@ -6,7 +6,7 @@ class SearchForm(FlaskForm):
     chromosome = StringField('chromosome')
     protein_name = StringField('protein name')
     symbol = StringField('gene symbol')
-    gene_id = StringField('gene id')
+    gene_id = StringField('ensembl gene id')
     area_min = IntegerField('binding location min',
             validators=[
                 Optional()

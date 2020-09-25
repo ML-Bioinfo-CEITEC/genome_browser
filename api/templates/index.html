@@ -11,163 +11,26 @@
                 margin-top: .5rem; 
                 margin-bottom: 0rem;
             }
+            .help-icon {
+                /* https://icons8.com/icons/set/ios-help */
+                content: url("help-icon.png");
+            }
+            .numberCircle {
+                width: 16px;
+                line-height: 16px;
+                border-radius: 50%;
+                text-align: center;
+                font-size: 14px;
+                border: 2px solid #666;
+            }
+
         </style>
     </head>
     <body>
         <div style="padding-left: 2%;">
-            <div style="width: 10%; float: left; ">
-                <form method="POST" action="" nonvalidate>
-                    {{ form.hidden_tag() }}
-                    <div>
-                        {{ form.chromosome.label(class="menu-label") }}<br>
-                        {{ form.chromosome(value=params['chromosome'], class_='form-control form-control-sm') }}
-                        {% for error in form.chromosome.errors %}
-                            <span style="color: red;">[{{ error }}]</span>
-                        {% endfor %}
-                    </div>
-                    <div>
-                        {{ form.protein_name.label(class="menu-label") }}<br>
-                        {{ form.protein_name(value=params['protein'], class_='form-control form-control-sm') }}
-                        {% for error in form.protein_name.errors %}
-                            <span style="color: red;">[{{ error }}]</span>
-                        {% endfor %}
-                    </div>
-                    <div>
-                        {{ form.gene_id.label(class="menu-label") }}<br>
-                        {{ form.gene_id(value=params['gene_id'], class_='form-control form-control-sm') }}
-                        {% for error in form.gene_id.errors %}
-                            <span style="color: red;">[{{ error }}]</span>
-                        {% endfor %}
-                    </div>
-                    <div>
-                        {{ form.symbol.label(class="menu-label")}}<br>
-                        {{ form.symbol(value=params['symbol'], class_='form-control form-control-sm') }}
-                        {% for error in form.symbol.errors %}
-                            <span style="color: red;">[{{ error }}]</span>
-                        {% endfor %}
-                    </div>
-                    <div>
-                        {{ form.score_min.label(class="menu-label") }}<br>
-                        {{ form.score_min(value=params['score_min'], class_='form-control form-control-sm') }}
-                        {% for error in form.score_min.errors %}
-                            <span style="color: red;">[{{ error }}]</span>
-                        {% endfor %}
-                    </div>
-                    <div style="display: inline-block; padding-bottom: 0.35rem;">
-                        <label class="menu-label">binding location</label><br>
-                        <nobr style="display: inline;"><span style="white-space: nowrap;"><label style="display: inline; padding-right: 5%;" for="area_min">min</label>{{ form.area_min(value=params['area_min'], class_='form-control form-control-sm', placeholder="-∞", style="display: inline; width: 76%") }}</span></nobr>
-                        {% for error in form.area_min.errors %}
-                            <span style="color: red;">[{{ error }}]</span>
-                        {% endfor %}
-                    </div>
-                    <div style="display: inline-block;">
-                        <nobr style="display: inline;"><span style="white-space: nowrap;"><label style="display: inline; padding-right: 3.5%;" for="area_max">max</label>{{ form.area_max(value=params['area_max'], class_='form-control form-control-sm', placeholder="∞", style="display: inline; width: 76%") }}</span></nobr>
-                        {% for error in form.area_max.errors %}
-                            <span style="color: red;">[{{ error }}]</span>
-                        {% endfor %}
-                    </div>
-                    <div style="display: inline-block; padding-bottom: 0.35rem;">
-                        <label class="menu-label">gene location</label><br>
-                        <nobr style="display: inline;"><span style="white-space: nowrap;"><label style="display: inline; padding-right: 5%;" for="loc_min">min</label>{{ form.loc_min(value=params['loc_min'], class_='form-control form-control-sm', placeholder="-∞", style="display: inline; width: 76%") }}</span></nobr>
-                        {% for error in form.loc_min.errors %}
-                            <span style="color: red;">[{{ error }}]</span>
-                        {% endfor %}
-                    </div>
-                    <div style="display: inline-block;">
-                        <nobr style="display: inline;"><span style="white-space: nowrap;"><label style="display: inline; padding-right: 3.5%;" for="loc_max">max</label>{{ form.loc_max(value=params['loc_max'], class_='form-control form-control-sm', placeholder="∞", style="display: inline; width: 76%") }}</span></nobr>
-                        {% for error in form.loc_max.errors %}
-                            <span style="color: red;">[{{ error }}]</span>
-                        {% endfor %}
-                    </div>
-                    <div style="padding-top: 5%;">
-                        <button type="submit" class="btn btn-sm btn-primary">Search</button>
-                    </div>
-                </form>
-            </div>
-
-            <div style="margin-left: 12%;">
-                <table class='table table-striped table-bordered table-sm' style="height: 80%; width: 98%; border: none; margin-bottom: 0.3rem;">
-                    {% if rows %}
-                    <thead class='thead-dark'>
-                        <tr style="text-align: center;">
-                            {% for key, value in rows[0].items()%}
-                                {% if key != 'Protein url' and key!='Symbol url'%}
-                                <th>{{key}} 
-                                    <div style="white-space: nowrap;">
-                                        <a href="{{primary_sort_asc_urls[key]}}">↥</a> 
-                                        <a href="{{primary_sort_desc_urls[key]}}">↧</a> 
-                                        <a href="{{secondary_sort_asc_urls[key]}}">↟</a> 
-                                        <a href="{{secondary_sort_desc_urls[key]}}">↡</a>
-                                    </div>
-                                </th>
-                                {%endif%}
-                            {% endfor %}
-                        </tr>  
-                    </thead> 
-                    <tbody>
-                        {% for row in rows%}
-                        <tr class="table-row" style="padding: 0rem; vertical-align: top;">
-                            {% for key, value in row.items()%}
-                                <!-- hardcoded protein_name and Protein url names (defined in pagination) -->
-                                {% if (key == "protein_name")%}
-                                    {% if row['Protein url'] == None%}
-                                    <td style="white-space: nowrap;">{{value}}</td>
-                                    {%else%}
-                                    <td><a href="{{row['Protein url']}}">{{value}}</a></td>
-                                    {%endif%}
-                                {% elif key == "symbol"%}
-                                    {% if row['Symbol url'] == None%}
-                                    <td style="white-space: nowrap;">{{value}}</td>
-                                    {%else%}
-                                    <td><a href="{{row['Symbol url']}}">{{value}}</a></td>
-                                    {%endif%}
-                                {%elif key == 'score' and value%}
-                                <td>{{value|round(3, 'floor')}}</td>
-                                {%elif key == 'note' and value == None%}
-                                <td>{{""}}</td>
-                                {% elif key!= 'Protein url' and key!= 'Symbol url'%}
-                                <td>{{value}}</td>
-                                {%endif%}
-                            {% endfor %}
-                        </tr>
-                        {% endfor %}
-                        {% if (rows_per_page - rows|length) > 0 and rows != 0 %}
-                            {% for _ in range(rows_per_page - rows|length) %}
-                                <tr class="table-row">
-                                    {% for _ in range(rows[0]|length - 2) %}
-                                        <td>{{""}}</td>
-                                    {% endfor %}
-                                </tr>
-                            {% endfor %}
-                        {% endif %}
-                    </tbody>
-                    {% endif %}
-                </table>
-            </div>
-
-            <div style="margin-left: 12%; padding-bottom: 1%; ">
-                {% if rows %}
-                    {% if has_prev %}
-                        <a href="{{ prev_page_url }}" type="button" class="btn btn-sm btn-primary">Previous</a>
-                    {% else %}
-                        <a href="{{ prev_page_url }}" type="button" class="btn btn-sm btn-primary disabled" aria-disabled="true" style="opacity: 0.3;">Previous</a>
-                    {% endif %}
-                    {% if has_next %} 
-                        <a href="{{ next_page_url }}" type="button" class="btn btn-sm btn-primary">Next</a>
-                    {% else %}
-                        <a href="{{ next_page_url }}" type="button" class="btn btn-sm btn-primary disabled" aria-disabled="true" style="opacity: 0.3;">Next</a>
-                    {% endif %} 
-                
-                    {% if rows %}
-                        <a href="{{download_url}}" type="button" class="btn btn-sm btn-primary" style="float: right; margin-right: 2.5%;">Download</a>
-                    {% endif %}
-                    <div>Page {{params['page']}} / {{pages}}</div>
-                {% else %}
-                    <div style="margin-top: 2%; margin-left: 2%; font-weight: bold">
-                        <div>Empty search result</div>
-                    </div>
-                {% endif %}
-            </div>
+            {% include 'search_form.html' %}
+            {% include 'result_table.html' %}
+            {% include 'lower_navigation_bar.html' %}
         </div>
     </body>
 </html>

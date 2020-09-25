@@ -1,0 +1,23 @@
+<div style="margin-left: 12%; padding-bottom: 1%; ">
+    {% if rows %}
+        {% if has_prev %}
+            <a href="{{ prev_page_url }}" type="button" class="btn btn-sm btn-primary">Previous</a>
+        {% else %}
+            <a href="{{ prev_page_url }}" type="button" class="btn btn-sm btn-primary disabled" aria-disabled="true" style="opacity: 0.3;">Previous</a>
+        {% endif %}
+        {% if has_next %} 
+            <a href="{{ next_page_url }}" type="button" class="btn btn-sm btn-primary">Next</a>
+        {% else %}
+            <a href="{{ next_page_url }}" type="button" class="btn btn-sm btn-primary disabled" aria-disabled="true" style="opacity: 0.3;">Next</a>
+        {% endif %} 
+    
+        {% if rows %}
+            <a href="{{download_url}}" type="button" class="btn btn-sm btn-primary" style="float: right; margin-right: 2.5%;">Download</a>
+        {% endif %}
+        <div>Page {{params['page']}} / {{pages}}</div>
+    {% else %}
+        <div style="margin-top: 2%; margin-left: 2%; font-weight: bold">
+            <div>Empty search result</div>
+        </div>
+    {% endif %}
+</div>
