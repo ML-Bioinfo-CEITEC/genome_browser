@@ -1,3 +1,5 @@
-{% macro help_icon(tooltip_text) %}
-    <sup><a class="badge badge-pill badge-primary" style="cursor: pointer; font-size: 65%;" data-toggle="tooltip" data-placement="right" title="{{ tooltip_text }}">?</a></sup>
+{% macro help_icon(tooltip_name, tooltips) %}
+    {% if (tooltips[tooltip_name]) %}
+        <sup><a class="badge badge-pill badge-primary" style="cursor: pointer; font-size: 65%;" data-toggle="tooltip" data-placement="right" title="{{tooltips[tooltip_name]}}">?</a></sup>
+    {% endif %}
 {% endmacro %}
