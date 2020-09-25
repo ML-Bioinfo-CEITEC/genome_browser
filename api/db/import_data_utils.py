@@ -15,6 +15,7 @@ def create_prejoin(engine):
     try:
         session.execute(sql)
         session.commit()
+        print("Table created OK")
     except  Exception as e:
         print(e)
         print("ROLLBACK")
@@ -29,6 +30,7 @@ def delete_all_rows(engine):
     try:
         session.execute(sql)
         session.commit()
+        print("Deletion OK")
     except Exception as e:
         print(e)
         print("ROLLBACK")
@@ -36,15 +38,10 @@ def delete_all_rows(engine):
     finally:
         session.close()
 
+#TODO check after dataset change, probably not needed, stats are there already (SELECT * from pg_stats;)
 def analyze(engine):
     with engine.connect() as con:
         con.execute('ANALYZE;')
-
-def cleanup():
-    pass
-    #TODO just delete rows?
-    # Gene.__table__.drop(engine)
-    # BindingSite.__table__.drop(engine)
 
 def create_all_tables():
     db.models.Base.metadata.create_all(bind=db.models.engine)
@@ -53,17 +50,20 @@ def prepare_binding_sites(csv_name):
     csv_file_path = base_path/csv_name
     data_df = pd.read_csv(csv_file_path)
     data_df.to_csv(base_path/"prepared"/'binding_sites_prepared.csv', index_label="id", index=True, header=False)
+    print("Binding sites csv preparation OK")
 
-#TODO loads the whole thing to ram 
 def prepare_proteins(csv_name):
     csv_file_path = base_path /csv_name
     data_df = pd.read_csv(csv_file_path)
     data_df.to_csv(base_path/"prepared"/'proteins_prepared.csv', header=False, index=False)
+    print("Proteins csv preparation OK")
 
 def prepare_genes(csv_name):
     csv_file_path = base_path /csv_name
     data_df = pd.read_csv(csv_file_path)
     data_df.to_csv(base_path/"prepared"/'genes_prepared.csv', header=False, index=False)
+    print("Genes csv preparation OK")
+
 
     
 
