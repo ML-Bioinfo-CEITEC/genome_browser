@@ -49,12 +49,10 @@ sort_dict = {
       'strand_desc': PrejoinModel.strand.desc(),
       'symbol_asc': PrejoinModel.symbol.asc(),
       'symbol_desc': PrejoinModel.symbol.desc(),
-      'gene_start_asc': PrejoinModel.gene_start.asc(),
-      'gene_start_desc': PrejoinModel.gene_start.desc(),
-      'gene_end_asc': PrejoinModel.gene_end.asc(),
-      'gene_end_desc': PrejoinModel.gene_end.desc(),
       'id_asc': PrejoinModel.bs_id.asc(),
       'id_desc': PrejoinModel.bs_id.desc(),
+      'note_asc': PrejoinModel.note.asc(),
+      'note_desc': PrejoinModel.note.desc(),
 
    }
 
@@ -100,8 +98,9 @@ def get_query_from_params(params):
 
    #sorting
    #i display only 3 decimals for score - if i sort by score primarily and secondarily by something else, the table looks weird, because the full score isnt displayed
-   query = query.order_by(sort_dict[sortby])
-   if(sortby_secondary):
+   if(sortby in sort_dict.keys()):
+      query = query.order_by(sort_dict[sortby])
+   if(sortby_secondary and sortby_secondary in sort_dict.keys()):
       query = query.order_by(sort_dict[sortby_secondary])
 
    return query
