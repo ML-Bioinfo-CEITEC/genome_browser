@@ -4,7 +4,7 @@
         {{ form.hidden_tag() }}
         <div>
             <div style="white-space: nowrap;">
-                {{ form.chromosome.label(class="menu-label") }} 
+                {{ form.chromosome.label(class="menu-label", style="white-space: normal;") }} 
                 {{ helper.help_icon("chromosome", tooltips) }}
             </div>
             {{ form.chromosome(value=params['chromosome'], class_='form-control form-control-sm') }}
@@ -14,7 +14,7 @@
         </div>
         <div>
             <div style="white-space: nowrap;">
-                {{ form.protein_name.label(class="menu-label") }}
+                {{ form.protein_name.label(class="menu-label", style="white-space: normal;") }}
                 {{ helper.help_icon("protein_name", tooltips) }}
             </div>
             {{ form.protein_name(value=params['protein'], class_='form-control form-control-sm') }}
@@ -24,7 +24,7 @@
         </div>
         <div>
             <div style="white-space: nowrap;">
-                {{ form.gene_id.label(class="menu-label") }} 
+                {{ form.gene_id.label(class="menu-label", style="white-space: normal;") }} 
                 {{ helper.help_icon("gene_id", tooltips) }}
             </div>
             {{ form.gene_id(value=params['gene_id'], class_='form-control form-control-sm') }}
@@ -34,7 +34,7 @@
         </div>
         <div>
             <div style="white-space: nowrap;">
-                {{ form.symbol.label(class="menu-label")}} 
+                {{ form.symbol.label(class="menu-label", style="white-space: normal;")}} 
                 {{ helper.help_icon("gene_symbol", tooltips) }}
             </div>
             {{ form.symbol(value=params['symbol'], class_='form-control form-control-sm') }}
@@ -44,7 +44,7 @@
         </div>
         <div>
             <div style="white-space: nowrap;">
-                {{ form.score_min.label(class="menu-label") }} 
+                {{ form.score_min.label(class="menu-label", style="white-space: normal;") }} 
                 {{ helper.help_icon("minimum_score", tooltips) }}
             </div>
             {{ form.score_min(value=params['score_min'], class_='form-control form-control-sm') }}
@@ -53,8 +53,10 @@
             {% endfor %}
         </div>
         
+        
+        <!-- binding location -->
         <div style="white-space: nowrap;">
-            <label class="menu-label">binding location&nbsp</label> 
+            <label class="menu-label" style="white-space: normal;">binding location&nbsp</label> 
             {{ helper.help_icon("binding_location", tooltips) }} 
         </div>
         <div style="display: inline-block; padding-bottom: 0.35rem;">
@@ -80,8 +82,10 @@
             {% endfor %}
         </div>
 
+        
+        <!-- gene location -->
         <div style="white-space: nowrap;">
-            <label class="menu-label">gene location&nbsp</label> 
+            <label class="menu-label" style="white-space: normal;">gene location&nbsp</label> 
             {{ helper.help_icon("gene_location", tooltips) }} 
         </div>
         <div style="display: inline-block; padding-bottom: 0.35rem;">
