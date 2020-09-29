@@ -7,8 +7,7 @@ from db.database import db
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URL
-#TODO remove in production
-app.config['DEBUG'] = True
+app.config['DEBUG'] = False
 app.config['SECRET_KEY'] = SECRET_KEY
 db.init_app(app)
 app.register_blueprint(genomic)
